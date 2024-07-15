@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "calibrationthread.h"
+#include "graphicsviewcontainer.h"
+#include "markerthread.h"
 #include <camerathread.h>
 #include <opencv2/opencv.hpp>
 #include <QDir>
@@ -23,14 +25,18 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void pointSelected(const QPointF &point);
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
-    QGraphicsScene *scene;
     CameraThread *cameraThread;
     CalibrationThread *calibrationThread;
+    MarkerThread *markerThread;
+    GraphicsViewContainer *graphicsViewContainer;
 
     int frameNumber;
     QString imagesDir;
@@ -45,6 +51,5 @@ private slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onCalibrationFinished(bool success);
-    void updateFrame(const cv::Mat &frame);
 };
 #endif // MAINWINDOW_H

@@ -11,13 +11,17 @@ CONFIG += c++17
 SOURCES += \
     calibrationthread.cpp \
     camerathread.cpp \
+    graphicsviewcontainer.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    markerthread.cpp
 
 HEADERS += \
     calibrationthread.h \
     camerathread.h \
-    mainwindow.h
+    graphicsviewcontainer.h \
+    mainwindow.h \
+    markerthread.h
 
 FORMS += \
     mainwindow.ui

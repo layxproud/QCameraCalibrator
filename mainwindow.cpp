@@ -10,19 +10,30 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , cameraThread(new CameraThread(this))
     , calibrationThread(new CalibrationThread(this))
-    , scene(new QGraphicsScene(this))
+    , markerThread(new MarkerThread(this))
     , frameNumber(0)
     , imagesDir(QDir::currentPath() + "/images")
 {
     ui->setupUi(this);
 
-    ui->cameraView->setScene(scene);
+    graphicsViewContainer = new GraphicsViewContainer(this);
+    ui->cameraLayout->addWidget(graphicsViewContainer);
 
     connect(ui->captureButton, &QPushButton::clicked, this, &MainWindow::onCaptureFrame);
     connect(ui->calibrateButton, &QPushButton::clicked, this, &MainWindow::onStartCalibration);
     connect(ui->toolBox, &QToolBox::currentChanged, this, &MainWindow::onPageChanged);
 
-    connect(cameraThread, &CameraThread::frameReady, this, &MainWindow::updateFrame);
+    connect(
+        cameraThread,
+        &CameraThread::frameReady,
+        graphicsViewContainer,
+        &GraphicsViewContainer::updateFrame);
+    connect(
+        markerThread,
+        &MarkerThread::frameReady,
+        graphicsViewContainer,
+        &GraphicsViewContainer::updateFrame);
+    connect(this, &MainWindow::pointSelected, markerThread, &MarkerThread::onPointSelected);
     connect(
         calibrationThread,
         &CalibrationThread::calibrationFinished,
@@ -38,6 +49,7 @@ MainWindow::~MainWindow()
 {
     stopThread(cameraThread);
     stopThread(calibrationThread);
+    stopThread(markerThread);
 
     delete ui;
 }
@@ -45,10 +57,10 @@ MainWindow::~MainWindow()
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        if (ui->cameraView->geometry().contains(event->pos())) {
-            QPointF mappedPos = ui->cameraView->mapToScene(event->pos());
-            mappedPos -= QPointF(10, 10);
-            qDebug() << mappedPos.x() << " , " << mappedPos.y();
+        if (graphicsViewContainer->geometry().contains(event->pos())) {
+            QGraphicsView *view = graphicsViewContainer->getView();
+            QPointF mappedPos = view->mapToScene(view->mapFromGlobal(event->globalPos()));
+            emit pointSelected(mappedPos);
         }
     }
     QMainWindow::mousePressEvent(event);
@@ -75,6 +87,13 @@ void MainWindow::stopThread(QThread *thread)
         if (calibration) {
             calibration->stop();
             calibration->wait();
+            return;
+        }
+
+        MarkerThread *marker = dynamic_cast<MarkerThread *>(thread);
+        if (marker) {
+            marker->stop();
+            marker->wait();
             return;
         }
 
@@ -106,7 +125,12 @@ void MainWindow::ensureDirectoryIsClean(const QString &path)
 void MainWindow::onPageChanged(int page)
 {
     if (page == 0) {
+        stopThread(markerThread);
+        startThread(cameraThread);
     } else {
+        stopThread(cameraThread);
+        stopThread(calibrationThread);
+        startThread(markerThread);
     }
 }
 
@@ -127,22 +151,4 @@ void MainWindow::onCalibrationFinished(bool success)
     } else {
         qWarning() << "Не удалось провести калибровку";
     }
-}
-
-void MainWindow::updateFrame(const cv::Mat &frame)
-{
-    cv::Mat frameCopy = frame.clone();
-    QImage img(frameCopy.data, frameCopy.cols, frameCopy.rows, frameCopy.step, QImage::Format_RGB888);
-    QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(img.rgbSwapped()));
-    scene->clear();
-    scene->addItem(item);
-    ui->cameraView->fitInView(item, Qt::KeepAspectRatio);
-
-    //    cv::Mat rgbFrame;
-    //    cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
-    //    QImage img((const uchar *) rgbFrame.data, rgbFrame.cols, rgbFrame.rows, QImage::Format_RGB888);
-    //    QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(img));
-    //    scene->clear();
-    //    scene->addItem(item);
-    //    ui->cameraView->fitInView(item, Qt::KeepAspectRatio);
 }

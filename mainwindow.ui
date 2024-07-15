@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QGraphicsView" name="cameraView"/>
+     <layout class="QVBoxLayout" name="cameraLayout"/>
     </item>
     <item>
      <widget class="QToolBox" name="toolBox">
@@ -28,7 +28,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>388</width>
+         <width>774</width>
          <height>479</height>
         </rect>
        </property>
@@ -57,7 +57,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>388</width>
+         <width>774</width>
          <height>479</height>
         </rect>
        </property>
