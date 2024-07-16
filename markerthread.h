@@ -12,6 +12,7 @@ class MarkerThread : public QThread
     Q_OBJECT
 public:
     explicit MarkerThread(QObject *parent = nullptr);
+    void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
     void stop();
 
 signals:
@@ -40,7 +41,6 @@ private:
 
     std::map<std::string, Configuration> configurations;
     std::string currentConfigurationName;
-    std::string prevConfigurationName;
 
     CalibrationParams calibrationParams;
     std::vector<int> markerIds;

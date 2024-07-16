@@ -15,6 +15,18 @@ bool YamlHandler::loadCalibrationParameters(const std::string &filename, Calibra
     return true;
 }
 
+bool YamlHandler::saveCalibrationParameters(
+    const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs)
+{
+    cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+    if (!fs.isOpened())
+        return false;
+    fs << "CameraMatrix" << cameraMatrix;
+    fs << "DistCoeffs" << distCoeffs;
+    fs.release();
+    return true;
+}
+
 bool YamlHandler::loadConfigurations(
     const std::string &filename, std::map<std::string, Configuration> &configurations)
 {

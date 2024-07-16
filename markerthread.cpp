@@ -4,9 +4,7 @@
 MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
-    , yamlHandler(new YamlHandler(this))
     , currentConfigurationName("")
-    , prevConfigurationName("")
 {
     yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
     yamlHandler->loadConfigurations("configurations.yml", configurations);
@@ -79,22 +77,24 @@ void MarkerThread::run()
                 }
 
                 updateSelectedPointPosition();
+
+                if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)
+                    && !currentConfigurationName.empty()) {
+                    std::vector<cv::Point3f> points3D = {selectedPoint};
+                    std::vector<cv::Point2f> points2D;
+                    cv::projectPoints(
+                        points3D,
+                        cv::Vec3d::zeros(),
+                        cv::Vec3d::zeros(),
+                        calibrationParams.cameraMatrix,
+                        calibrationParams.distCoeffs,
+                        points2D);
+
+                    cv::circle(currentFrame, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
+                }
+            } else {
+                detectCurrentConfiguration(); // Call it even when there are no markers
             }
-
-            if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)) {
-                std::vector<cv::Point3f> points3D = {selectedPoint};
-                std::vector<cv::Point2f> points2D;
-                cv::projectPoints(
-                    points3D,
-                    cv::Vec3d::zeros(),
-                    cv::Vec3d::zeros(),
-                    calibrationParams.cameraMatrix,
-                    calibrationParams.distCoeffs,
-                    points2D);
-
-                cv::circle(currentFrame, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
-            }
-
             emit frameReady(currentFrame);
         }
         msleep(30);
@@ -137,24 +137,23 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
 void MarkerThread::detectCurrentConfiguration()
 {
+    std::string newConfigurationName = "";
+
     for (const auto &config : configurations) {
-        bool match = true;
         for (int id : config.second.markerIds) {
-            if (std::find(markerIds.begin(), markerIds.end(), id) == markerIds.end()) {
-                match = false;
+            if (std::find(markerIds.begin(), markerIds.end(), id) != markerIds.end()) {
+                newConfigurationName = config.first;
                 break;
             }
         }
-        if (match) {
-            currentConfigurationName = config.first;
-            if (currentConfigurationName != prevConfigurationName) {
-                emit newConfiguration(currentConfigurationName);
-            }
-            prevConfigurationName = currentConfigurationName;
+        if (!newConfigurationName.empty()) {
             break;
-        } else {
-            currentConfigurationName = "";
         }
+    }
+
+    if (newConfigurationName != currentConfigurationName) {
+        emit newConfiguration(newConfigurationName);
+        currentConfigurationName = newConfigurationName;
     }
 }
 
@@ -203,7 +202,6 @@ cv::Point3f MarkerThread::calculateRelativePosition(
 void MarkerThread::updateSelectedPointPosition()
 {
     detectCurrentConfiguration();
-    qDebug() << QString::fromStdString(currentConfigurationName);
     if (currentConfigurationName.empty()) {
         return;
     }

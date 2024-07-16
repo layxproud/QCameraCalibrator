@@ -36,8 +36,8 @@ void CalibrationThread::run()
     QStringList fileNames = dir.entryList();
 
     if (fileNames.isEmpty()) {
-        qDebug() << "В директории " << imagesDir << " не обнаружены изображения";
-        emit calibrationFinished(false);
+        emit calibrationFinished(
+            false, QString(tr("В директории %1 не обнаружены изображения")).arg(imagesDir));
         return;
     }
 
@@ -57,8 +57,7 @@ void CalibrationThread::run()
     }
 
     if (frames.empty()) {
-        qCritical() << "Не удалось преобразовать изображения в cv::Mat";
-        emit calibrationFinished(false);
+        emit calibrationFinished(false, tr("Не удалось преобразовать изображения в cv::Mat"));
         return;
     }
 
@@ -96,8 +95,7 @@ void CalibrationThread::run()
     }
 
     if (allCorners.empty()) {
-        qCritical() << "Недостаточно данных для калибровки";
-        emit calibrationFinished(false);
+        emit calibrationFinished(false, tr("Недостаточно данных для калибровки"));
         return;
     }
 
@@ -115,32 +113,19 @@ void CalibrationThread::run()
             tvecs);
 
         if (rms > 0) {
-            qDebug() << "Калибровка завершена c показателем RMS =" << rms;
-            if (saveCalibrationParameters("calibration.yml", cameraMatrix, distCoeffs)) {
-                qDebug() << "Файл калибровки сохранен";
-                emit calibrationFinished(true);
+            if (yamlHandler->saveCalibrationParameters("calibration.yml", cameraMatrix, distCoeffs)) {
+                emit calibrationFinished(
+                    true,
+                    QString(tr("Калибровка завершена успешно c показателем RMS = %1")).arg(rms));
             } else {
-                qCritical() << "Не удалось сохранить файл калибровки";
-                emit calibrationFinished(false);
+                emit calibrationFinished(
+                    false, tr("Калибровка завершена, но не удалось сохранить файл калибровки"));
             }
         } else {
-            qCritical() << "Калибровка не удалась";
-            emit calibrationFinished(false);
+            emit calibrationFinished(
+                false, QString(tr("Неудачная калибровка c показателем RMS = %1")).arg(rms));
         }
     } catch (const cv::Exception &e) {
-        qCritical() << "Ошибка калибровки: " << e.what();
-        emit calibrationFinished(false);
+        emit calibrationFinished(false, QString(tr("Ошибка калибровки: %1")).arg(e.what()));
     }
-}
-
-bool CalibrationThread::saveCalibrationParameters(
-    const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs)
-{
-    cv::FileStorage fs(filename, cv::FileStorage::WRITE);
-    if (!fs.isOpened())
-        return false;
-    fs << "CameraMatrix" << cameraMatrix;
-    fs << "DistCoeffs" << distCoeffs;
-    fs.release();
-    return true;
 }

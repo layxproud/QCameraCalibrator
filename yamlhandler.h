@@ -24,6 +24,8 @@ public:
     YamlHandler(QObject *parent = nullptr);
 
     bool loadCalibrationParameters(const std::string &filename, CalibrationParams &params);
+    bool saveCalibrationParameters(
+        const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs);
     bool loadConfigurations(
         const std::string &filename, std::map<std::string, Configuration> &configurations);
     bool saveConfigurations(

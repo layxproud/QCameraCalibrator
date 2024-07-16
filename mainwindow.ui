@@ -6,9 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>978</width>
+    <height>618</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>12</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -28,8 +33,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>774</width>
-         <height>479</height>
+         <width>952</width>
+         <height>478</height>
         </rect>
        </property>
        <attribute name="label">
@@ -37,33 +42,62 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QPushButton" name="calibrateButton">
-          <property name="text">
-           <string>СТАРТ</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="captureButton">
           <property name="text">
            <string>СДЕЛАТЬ КАДР</string>
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="calibrateButton">
+          <property name="text">
+           <string>СТАРТ</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="configurationPage">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>774</width>
-         <height>479</height>
+         <width>952</width>
+         <height>478</height>
         </rect>
        </property>
        <attribute name="label">
         <string>Калибровка маркеров</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="nameLabel">
+            <property name="text">
+             <string>Название</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="nameInput"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -74,8 +108,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>21</height>
+     <width>978</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

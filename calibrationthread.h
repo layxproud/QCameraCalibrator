@@ -1,6 +1,7 @@
 #ifndef CALIBRATIONTHREAD_H
 #define CALIBRATIONTHREAD_H
 
+#include "yamlhandler.h"
 #include <opencv2/aruco.hpp>
 #include <opencv2/opencv.hpp>
 #include <QDir>
@@ -13,16 +14,18 @@ class CalibrationThread : public QThread
 public:
     explicit CalibrationThread(QObject *parent = nullptr);
 
+    void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
     void setFrames(const std::vector<cv::Mat> &f) { frames = f; }
     void stop();
 
 signals:
-    void calibrationFinished(bool success);
+    void calibrationFinished(bool success, const QString &message);
 
 protected:
     void run() override;
 
 private:
+    YamlHandler *yamlHandler;
     bool running;
     QMutex mutex;
     std::vector<cv::Mat> frames;
@@ -30,10 +33,6 @@ private:
     cv::aruco::Dictionary dictionary;
     cv::aruco::DetectorParameters detectorParams;
     cv::aruco::ArucoDetector detector;
-
-    // bool loadCalibrationParameters(const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs);
-    bool saveCalibrationParameters(
-        const std::string &filename, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs);
 };
 
 #endif // CALIBRATIONTHREAD_H

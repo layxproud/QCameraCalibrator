@@ -1,13 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
-#include <QGraphicsPixmapItem>
-#include <QImage>
-#include <QPixmap>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , yamlHandler(new YamlHandler(this))
     , cameraThread(new CameraThread(this))
     , calibrationThread(new CalibrationThread(this))
     , markerThread(new MarkerThread(this))
@@ -19,6 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     graphicsViewContainer = new GraphicsViewContainer(this);
     ui->cameraLayout->addWidget(graphicsViewContainer);
+
+    calibrationThread->setYamlHandler(yamlHandler);
+    markerThread->setYamlHandler(yamlHandler);
 
     connect(ui->captureButton, &QPushButton::clicked, this, &MainWindow::onCaptureFrame);
     connect(ui->calibrateButton, &QPushButton::clicked, this, &MainWindow::onStartCalibration);
@@ -146,16 +148,16 @@ void MainWindow::onStartCalibration()
     startThread(calibrationThread);
 }
 
-void MainWindow::onCalibrationFinished(bool success)
+void MainWindow::onCalibrationFinished(bool success, const QString &message)
 {
     if (success) {
-        qDebug() << "Калибровка завершена";
+        QMessageBox::information(this, tr("Успешная калибровка"), message);
     } else {
-        qWarning() << "Не удалось провести калибровку";
+        QMessageBox::warning(this, tr("Ошибка калибровки"), message);
     }
 }
 
 void MainWindow::onNewConfiguration(const std::string &name)
 {
-    qDebug() << "New config: " << QString::fromStdString(name);
+    ui->nameInput->setText(QString::fromStdString(name));
 }

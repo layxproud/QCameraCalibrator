@@ -4,6 +4,7 @@
 #include "calibrationthread.h"
 #include "graphicsviewcontainer.h"
 #include "markerthread.h"
+#include "yamlhandler.h"
 #include <camerathread.h>
 #include <opencv2/opencv.hpp>
 #include <QDir>
@@ -33,6 +34,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    YamlHandler *yamlHandler;
     CameraThread *cameraThread;
     CalibrationThread *calibrationThread;
     MarkerThread *markerThread;
@@ -50,7 +52,7 @@ private slots:
     void onPageChanged(int page);
     void onCaptureFrame();
     void onStartCalibration();
-    void onCalibrationFinished(bool success);
+    void onCalibrationFinished(bool success, const QString &message);
     void onNewConfiguration(const std::string &name);
 };
 #endif // MAINWINDOW_H
