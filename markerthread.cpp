@@ -4,7 +4,6 @@
 MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
-    , currentConfigurationName("")
 {
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 
@@ -78,7 +77,7 @@ void MarkerThread::run()
                 updateSelectedPointPosition();
 
                 if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)
-                    && !currentConfigurationName.empty()) {
+                    && !currentConfiguration.name.empty()) {
                     std::vector<cv::Point3f> points3D = {selectedPoint};
                     std::vector<cv::Point2f> points2D;
                     cv::projectPoints(
@@ -92,7 +91,7 @@ void MarkerThread::run()
                     cv::circle(currentFrame, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
                 }
             } else {
-                detectCurrentConfiguration(); // Call it even when there are no markers
+                detectCurrentConfiguration();
             }
             emit frameReady(currentFrame);
         }
@@ -118,8 +117,8 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
     Configuration newConfig;
     newConfig.markerIds = markerIds;
-    currentConfigurationName == "" ? newConfig.name = "New Configuration"
-                                   : newConfig.name = currentConfigurationName;
+    newConfig.name = currentConfiguration.name.empty() ? "New Configuration"
+                                                       : currentConfiguration.name;
 
     for (int markerId : newConfig.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), markerId);
@@ -132,27 +131,27 @@ void MarkerThread::onPointSelected(const QPointF &point)
     }
 
     configurations[newConfig.name] = newConfig;
+    currentConfiguration = newConfig;
 }
 
 void MarkerThread::detectCurrentConfiguration()
 {
-    std::string newConfigurationName = "";
-
+    Configuration new_Configuration = {{}, {}, ""};
     for (const auto &config : configurations) {
         for (int id : config.second.markerIds) {
             if (std::find(markerIds.begin(), markerIds.end(), id) != markerIds.end()) {
-                newConfigurationName = config.first;
+                new_Configuration = config.second;
                 break;
             }
         }
-        if (!newConfigurationName.empty()) {
+        if (!new_Configuration.name.empty()) {
             break;
         }
     }
 
-    if (newConfigurationName != currentConfigurationName) {
-        emit newConfiguration(newConfigurationName);
-        currentConfigurationName = newConfigurationName;
+    if (new_Configuration.name != currentConfiguration.name) {
+        emit newConfiguration(new_Configuration.name);
+        currentConfiguration = new_Configuration;
     }
 }
 
@@ -201,10 +200,10 @@ cv::Point3f MarkerThread::calculateRelativePosition(
 void MarkerThread::updateSelectedPointPosition()
 {
     detectCurrentConfiguration();
-    if (currentConfigurationName.empty()) {
+    if (currentConfiguration.name.empty()) {
         return;
     }
-    const auto &config = configurations[currentConfigurationName];
+    const auto &config = currentConfiguration;
     for (int id : config.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), id);
         if (it != markerIds.end()) {

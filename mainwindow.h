@@ -35,5 +35,6 @@ private slots:
     void onTaskFinished(bool success, const QString &message);
     void onNewConfiguration(const std::string &name);
     void onCalibrationParametersMissing();
+    void onSaveConfiguration();
 };
 #endif // MAINWINDOW_H

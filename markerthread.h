@@ -14,7 +14,7 @@ public:
     explicit MarkerThread(QObject *parent = nullptr);
     void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
     void setCalibrationParams(const CalibrationParams &params) { calibrationParams = params; }
-    std::map<std::string, Configuration> getConfigurations() { return configurations; }
+    Configuration getCurrConfiguration() { return currentConfiguration; }
     void stop();
 
 signals:
@@ -43,7 +43,6 @@ private:
 
     Configuration currentConfiguration;
     std::map<std::string, Configuration> configurations;
-    std::string currentConfigurationName;
 
     CalibrationParams calibrationParams;
     std::vector<int> markerIds;

@@ -30,8 +30,13 @@ public:
         const std::string &filename, std::map<std::string, Configuration> &configurations);
     bool saveConfigurations(
         const std::string &filename, const std::map<std::string, Configuration> &configurations);
+    bool updateConfigurations(const std::string &filename, const Configuration &currentConfiguration);
 
 private:
+    bool findDuplicateConfiguration(
+        const std::map<std::string, Configuration> &configurations,
+        const Configuration &currentConfiguration,
+        std::string &duplicateName);
 };
 
 #endif // YAMLHANDLER_H

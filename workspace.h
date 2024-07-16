@@ -21,6 +21,7 @@ public:
     void stopThread(QThread *thread);
     void ensureDirectoryIsClean(const QString &path);
     void clearDirectory(const QString &path);
+    void saveConfiguration(const QString &name);
 
 signals:
     void frameReady(const cv::Mat &frame);
@@ -34,7 +35,6 @@ public slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onMarkerSizeChanged(int size);
-    void onSaveConfiguration();
 
 private:
     YamlHandler *yamlHandler;

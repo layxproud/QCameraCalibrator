@@ -104,7 +104,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="configNameIInput"/>
+           <widget class="QLineEdit" name="configNameInput"/>
           </item>
          </layout>
         </item>

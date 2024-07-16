@@ -1,4 +1,6 @@
 #include "yamlhandler.h"
+#include <fstream>
+#include <sstream>
 
 YamlHandler::YamlHandler(QObject *parent)
     : QObject(parent)
@@ -79,4 +81,46 @@ bool YamlHandler::saveConfigurations(
     fs << "]";
     fs.release();
     return true;
+}
+
+bool YamlHandler::updateConfigurations(
+    const std::string &filename, const Configuration &currentConfiguration)
+{
+    std::map<std::string, Configuration> existingConfigurations;
+    loadConfigurations(filename, existingConfigurations);
+
+    std::string duplicateName;
+
+    if (findDuplicateConfiguration(existingConfigurations, currentConfiguration, duplicateName)) {
+        existingConfigurations[duplicateName] = currentConfiguration;
+    } else {
+        existingConfigurations.insert(
+            std::make_pair(currentConfiguration.name, currentConfiguration));
+    }
+
+    saveConfigurations(filename, existingConfigurations);
+
+    return true;
+}
+
+bool YamlHandler::findDuplicateConfiguration(
+    const std::map<std::string, Configuration> &configurations,
+    const Configuration &currentConfiguration,
+    std::string &duplicateName)
+{
+    for (const auto &entry : configurations) {
+        if (entry.second.name == currentConfiguration.name) {
+            duplicateName = entry.first;
+            return true;
+        }
+    }
+
+    for (const auto &entry : configurations) {
+        if (entry.second.markerIds == currentConfiguration.markerIds) {
+            duplicateName = entry.first;
+            return true;
+        }
+    }
+
+    return false;
 }

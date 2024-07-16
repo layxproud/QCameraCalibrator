@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
         QOverload<int>::of(&QSpinBox::valueChanged),
         workspace,
         &Workspace::onMarkerSizeChanged);
-    connect(ui->saveConfigButton, &QPushButton::clicked, workspace, &Workspace::onSaveConfiguration);
+    connect(ui->saveConfigButton, &QPushButton::clicked, this, &MainWindow::onSaveConfiguration);
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(
         workspace,
@@ -70,10 +70,15 @@ void MainWindow::onTaskFinished(bool success, const QString &message)
 
 void MainWindow::onNewConfiguration(const std::string &name)
 {
-    ui->configNameIInput->setText(QString::fromStdString(name));
+    ui->configNameInput->setText(QString::fromStdString(name));
 }
 
 void MainWindow::onCalibrationParametersMissing()
 {
     ui->toolBox->setCurrentIndex(0);
+}
+
+void MainWindow::onSaveConfiguration()
+{
+    workspace->saveConfiguration(ui->configNameInput->text());
 }
