@@ -131,12 +131,19 @@ void MarkerThread::onPointSelected(const QPointF &point)
     }
 
     configurations[newConfig.name] = newConfig;
-    currentConfiguration = newConfig;
+    // Костыль для того чтобы ГУИ успела обновиться
+    // Выглядит ужасно но что поделать
+    Configuration tempConfig = newConfig;
+    detectCurrentConfiguration();
+    if (tempConfig.name == currentConfiguration.name) {
+        currentConfiguration = tempConfig;
+    }
 }
 
 void MarkerThread::detectCurrentConfiguration()
 {
-    Configuration new_Configuration = {{}, {}, ""};
+    Configuration new_Configuration;
+    new_Configuration.name = "";
     for (const auto &config : configurations) {
         for (int id : config.second.markerIds) {
             if (std::find(markerIds.begin(), markerIds.end(), id) != markerIds.end()) {
@@ -149,6 +156,8 @@ void MarkerThread::detectCurrentConfiguration()
         }
     }
 
+    qDebug() << QString::fromStdString(new_Configuration.name) << " vs "
+             << QString::fromStdString(currentConfiguration.name);
     if (new_Configuration.name != currentConfiguration.name) {
         emit newConfiguration(new_Configuration.name);
         currentConfiguration = new_Configuration;
