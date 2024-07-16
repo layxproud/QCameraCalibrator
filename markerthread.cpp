@@ -5,6 +5,8 @@ MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
     , yamlHandler(new YamlHandler(this))
+    , currentConfigurationName("")
+    , prevConfigurationName("")
 {
     yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
     yamlHandler->loadConfigurations("configurations.yml", configurations);
@@ -117,7 +119,8 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
     Configuration newConfig;
     newConfig.markerIds = markerIds;
-    newConfig.name = "My Configuration 2";
+    currentConfigurationName == "" ? newConfig.name = "New Configuration"
+                                   : newConfig.name = currentConfigurationName;
 
     for (int markerId : newConfig.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), markerId);
@@ -144,7 +147,13 @@ void MarkerThread::detectCurrentConfiguration()
         }
         if (match) {
             currentConfigurationName = config.first;
+            if (currentConfigurationName != prevConfigurationName) {
+                emit newConfiguration(currentConfigurationName);
+            }
+            prevConfigurationName = currentConfigurationName;
             break;
+        } else {
+            currentConfigurationName = "";
         }
     }
 }
@@ -194,9 +203,10 @@ cv::Point3f MarkerThread::calculateRelativePosition(
 void MarkerThread::updateSelectedPointPosition()
 {
     detectCurrentConfiguration();
-    if (currentConfigurationName.empty())
+    qDebug() << QString::fromStdString(currentConfigurationName);
+    if (currentConfigurationName.empty()) {
         return;
-
+    }
     const auto &config = configurations[currentConfigurationName];
     for (int id : config.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), id);

@@ -16,6 +16,7 @@ public:
 
 signals:
     void frameReady(const cv::Mat &frame);
+    void newConfiguration(const std::string &name);
 
 protected:
     void run() override;
@@ -38,8 +39,8 @@ private:
     cv::Mat objPoints;
 
     std::map<std::string, Configuration> configurations;
-    Configuration currentConfiguration;
     std::string currentConfigurationName;
+    std::string prevConfigurationName;
 
     CalibrationParams calibrationParams;
     std::vector<int> markerIds;

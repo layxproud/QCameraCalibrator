@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
         graphicsViewContainer,
         &GraphicsViewContainer::updateFrame);
     connect(this, &MainWindow::pointSelected, markerThread, &MarkerThread::onPointSelected);
+    connect(markerThread, &MarkerThread::newConfiguration, this, &MainWindow::onNewConfiguration);
     connect(
         calibrationThread,
         &CalibrationThread::calibrationFinished,
@@ -152,4 +153,9 @@ void MainWindow::onCalibrationFinished(bool success)
     } else {
         qWarning() << "Не удалось провести калибровку";
     }
+}
+
+void MainWindow::onNewConfiguration(const std::string &name)
+{
+    qDebug() << "New config: " << QString::fromStdString(name);
 }

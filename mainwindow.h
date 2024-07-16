@@ -51,5 +51,6 @@ private slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onCalibrationFinished(bool success);
+    void onNewConfiguration(const std::string &name);
 };
 #endif // MAINWINDOW_H
