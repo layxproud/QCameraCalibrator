@@ -1,14 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "calibrationthread.h"
 #include "graphicsviewcontainer.h"
-#include "markerthread.h"
-#include "yamlhandler.h"
-#include <camerathread.h>
-#include <opencv2/opencv.hpp>
-#include <QDir>
-#include <QGraphicsScene>
+#include "workspace.h"
 #include <QMainWindow>
 #include <QMouseEvent>
 
@@ -34,24 +28,10 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    YamlHandler *yamlHandler;
-    CameraThread *cameraThread;
-    CalibrationThread *calibrationThread;
-    MarkerThread *markerThread;
+    Workspace *workspace;
     GraphicsViewContainer *graphicsViewContainer;
 
-    int frameNumber;
-    QString imagesDir;
-
-    void startThread(QThread *thread);
-    void stopThread(QThread *thread);
-    void clearDirectory(const QString &path);
-    void ensureDirectoryIsClean(const QString &path);
-
 private slots:
-    void onPageChanged(int page);
-    void onCaptureFrame();
-    void onStartCalibration();
     void onCalibrationFinished(bool success, const QString &message);
     void onNewConfiguration(const std::string &name);
 };

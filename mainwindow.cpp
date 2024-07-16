@@ -6,12 +6,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , yamlHandler(new YamlHandler(this))
-    , cameraThread(new CameraThread(this))
-    , calibrationThread(new CalibrationThread(this))
-    , markerThread(new MarkerThread(this))
-    , frameNumber(0)
-    , imagesDir(QDir::currentPath() + "/images")
+    , workspace(new Workspace(this))
 {
     ui->setupUi(this);
     resize(960, 560);
@@ -19,42 +14,23 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsViewContainer = new GraphicsViewContainer(this);
     ui->cameraLayout->addWidget(graphicsViewContainer);
 
-    calibrationThread->setYamlHandler(yamlHandler);
-    markerThread->setYamlHandler(yamlHandler);
-
-    connect(ui->captureButton, &QPushButton::clicked, this, &MainWindow::onCaptureFrame);
-    connect(ui->calibrateButton, &QPushButton::clicked, this, &MainWindow::onStartCalibration);
-    connect(ui->toolBox, &QToolBox::currentChanged, this, &MainWindow::onPageChanged);
-
+    connect(ui->captureButton, &QPushButton::clicked, workspace, &Workspace::onCaptureFrame);
+    connect(ui->calibrateButton, &QPushButton::clicked, workspace, &Workspace::onStartCalibration);
+    connect(ui->toolBox, &QToolBox::currentChanged, workspace, &Workspace::onPageChanged);
+    connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(
-        cameraThread,
-        &CameraThread::frameReady,
+        workspace,
+        &Workspace::frameReady,
         graphicsViewContainer,
         &GraphicsViewContainer::updateFrame);
-    connect(
-        markerThread,
-        &MarkerThread::frameReady,
-        graphicsViewContainer,
-        &GraphicsViewContainer::updateFrame);
-    connect(this, &MainWindow::pointSelected, markerThread, &MarkerThread::onPointSelected);
-    connect(markerThread, &MarkerThread::newConfiguration, this, &MainWindow::onNewConfiguration);
-    connect(
-        calibrationThread,
-        &CalibrationThread::calibrationFinished,
-        this,
-        &MainWindow::onCalibrationFinished);
+    connect(workspace, &Workspace::calibrationFinished, this, &MainWindow::onCalibrationFinished);
+    connect(workspace, &Workspace::newConfiguration, this, &MainWindow::onNewConfiguration);
 
-    startThread(cameraThread);
-
-    ensureDirectoryIsClean(imagesDir);
+    workspace->init();
 }
 
 MainWindow::~MainWindow()
 {
-    stopThread(cameraThread);
-    stopThread(calibrationThread);
-    stopThread(markerThread);
-
     delete ui;
 }
 
@@ -68,84 +44,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         }
     }
     QMainWindow::mousePressEvent(event);
-}
-
-void MainWindow::startThread(QThread *thread)
-{
-    if (thread && !thread->isRunning()) {
-        thread->start();
-    }
-}
-
-void MainWindow::stopThread(QThread *thread)
-{
-    if (thread && thread->isRunning()) {
-        CameraThread *camera = dynamic_cast<CameraThread *>(thread);
-        if (camera) {
-            camera->stop();
-            camera->wait();
-            return;
-        }
-
-        CalibrationThread *calibration = dynamic_cast<CalibrationThread *>(thread);
-        if (calibration) {
-            calibration->stop();
-            calibration->wait();
-            return;
-        }
-
-        MarkerThread *marker = dynamic_cast<MarkerThread *>(thread);
-        if (marker) {
-            marker->stop();
-            marker->wait();
-            return;
-        }
-
-        thread->quit();
-        thread->wait();
-    }
-}
-
-void MainWindow::clearDirectory(const QString &path)
-{
-    QDir dir(path);
-    dir.setNameFilters(QStringList() << "*.*");
-    dir.setFilter(QDir::Files);
-    foreach (QString dirFile, dir.entryList()) {
-        dir.remove(dirFile);
-    }
-}
-
-void MainWindow::ensureDirectoryIsClean(const QString &path)
-{
-    QDir dir(path);
-    if (dir.exists()) {
-        clearDirectory(path);
-    } else {
-        dir.mkpath(".");
-    }
-}
-
-void MainWindow::onPageChanged(int page)
-{
-    if (page == 0) {
-        stopThread(markerThread);
-        startThread(cameraThread);
-    } else {
-        stopThread(cameraThread);
-        stopThread(calibrationThread);
-        startThread(markerThread);
-    }
-}
-
-void MainWindow::onCaptureFrame()
-{
-    cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
-}
-
-void MainWindow::onStartCalibration()
-{
-    startThread(calibrationThread);
 }
 
 void MainWindow::onCalibrationFinished(bool success, const QString &message)
