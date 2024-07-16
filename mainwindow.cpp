@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     , imagesDir(QDir::currentPath() + "/images")
 {
     ui->setupUi(this);
+    resize(960, 560);
 
     graphicsViewContainer = new GraphicsViewContainer(this);
     ui->cameraLayout->addWidget(graphicsViewContainer);

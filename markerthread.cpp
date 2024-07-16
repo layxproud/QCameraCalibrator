@@ -4,9 +4,10 @@
 MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
+    , yamlHandler(new YamlHandler(this))
 {
-    loadCalibrationParameters("calibration.yml");
-    loadConfigurations("configurations.yml");
+    yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
+    yamlHandler->loadConfigurations("configurations.yml", configurations);
 
     AruCoDict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
     detectorParams = cv::aruco::DetectorParameters();
@@ -63,12 +64,11 @@ void MarkerThread::run()
                     solvePnP(
                         objPoints,
                         markerCorners.at(i),
-                        cameraMatrix,
-                        distCoeffs,
+                        calibrationParams.cameraMatrix,
+                        calibrationParams.distCoeffs,
                         rvecs.at(i),
                         tvecs.at(i));
 
-                    // Store the 2D and corresponding 3D points
                     cv::Point2f markerCenter = (markerCorners.at(i)[0] + markerCorners.at(i)[1]
                                                 + markerCorners.at(i)[2] + markerCorners.at(i)[3])
                                                * 0.25;
@@ -86,8 +86,8 @@ void MarkerThread::run()
                     points3D,
                     cv::Vec3d::zeros(),
                     cv::Vec3d::zeros(),
-                    cameraMatrix,
-                    distCoeffs,
+                    calibrationParams.cameraMatrix,
+                    calibrationParams.distCoeffs,
                     points2D);
 
                 cv::circle(currentFrame, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
@@ -132,69 +132,6 @@ void MarkerThread::onPointSelected(const QPointF &point)
     configurations[newConfig.name] = newConfig;
 }
 
-bool MarkerThread::loadCalibrationParameters(const std::string &filename)
-{
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-    if (!fs.isOpened())
-        return false;
-    fs["CameraMatrix"] >> cameraMatrix;
-    fs["DistCoeffs"] >> distCoeffs;
-    fs.release();
-    return true;
-}
-
-bool MarkerThread::loadConfigurations(const std::string &filename)
-{
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-    if (!fs.isOpened())
-        return false;
-
-    cv::FileNode configsNode = fs["Configurations"];
-    for (const auto &configNode : configsNode) {
-        Configuration config;
-        configNode["Name"] >> config.name;
-        configNode["MarkerIds"] >> config.markerIds;
-        cv::FileNode relativePointsNode = configNode["RelativePoints"];
-        for (const auto &relativePointNode : relativePointsNode) {
-            int markerId = std::stoi(relativePointNode.name().substr(7));
-            relativePointNode >> config.relativePoints[markerId];
-        }
-        configurations[config.name] = config;
-    }
-    fs.release();
-    return true;
-}
-
-bool MarkerThread::saveConfigurations(const std::string &filename)
-{
-    cv::FileStorage fs(filename, cv::FileStorage::WRITE);
-    if (!fs.isOpened())
-        return false;
-
-    fs << "Configurations"
-       << "[";
-    for (const auto &config : configurations) {
-        fs << "{";
-        fs << "Name" << config.second.name;
-        fs << "MarkerIds"
-           << "[";
-        for (int id : config.second.markerIds) {
-            fs << id;
-        }
-        fs << "]";
-        fs << "RelativePoints"
-           << "{";
-        for (const auto &relativePoint : config.second.relativePoints) {
-            fs << "Marker_" + std::to_string(relativePoint.first) << relativePoint.second;
-        }
-        fs << "}";
-        fs << "}";
-    }
-    fs << "]";
-    fs.release();
-    return true;
-}
-
 void MarkerThread::detectCurrentConfiguration()
 {
     for (const auto &config : configurations) {
@@ -229,8 +166,10 @@ float MarkerThread::getDepthAtPoint(const cv::Point2f &point)
 
 cv::Point3f MarkerThread::projectTo3D(const cv::Point2f &point2D, float depth)
 {
-    float x = (point2D.x - cameraMatrix.at<double>(0, 2)) / cameraMatrix.at<double>(0, 0);
-    float y = (point2D.y - cameraMatrix.at<double>(1, 2)) / cameraMatrix.at<double>(1, 1);
+    float x = (point2D.x - calibrationParams.cameraMatrix.at<double>(0, 2))
+              / calibrationParams.cameraMatrix.at<double>(0, 0);
+    float y = (point2D.y - calibrationParams.cameraMatrix.at<double>(1, 2))
+              / calibrationParams.cameraMatrix.at<double>(1, 1);
     return cv::Point3f(x * depth, y * depth, depth);
 }
 

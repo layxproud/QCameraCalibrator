@@ -14,14 +14,16 @@ SOURCES += \
     graphicsviewcontainer.cpp \
     main.cpp \
     mainwindow.cpp \
-    markerthread.cpp
+    markerthread.cpp \
+    yamlhandler.cpp
 
 HEADERS += \
     calibrationthread.h \
     camerathread.h \
     graphicsviewcontainer.h \
     mainwindow.h \
-    markerthread.h
+    markerthread.h \
+    yamlhandler.h
 
 FORMS += \
     mainwindow.ui
