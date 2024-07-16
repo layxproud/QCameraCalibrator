@@ -26,7 +26,7 @@
     <item>
      <widget class="QToolBox" name="toolBox">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="calibrationPage">
        <property name="geometry">
@@ -71,18 +71,49 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="markerSize">
           <item>
-           <widget class="QLabel" name="nameLabel">
+           <widget class="QLabel" name="markerSizeLabel">
+            <property name="text">
+             <string>Длина маркера (мм)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="markerSizeInput">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>31</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="configName">
+          <item>
+           <widget class="QLabel" name="configNameLabel">
             <property name="text">
              <string>Название</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="nameInput"/>
+           <widget class="QLineEdit" name="configNameIInput"/>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveConfigButton">
+          <property name="text">
+           <string>Сохранить</string>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer">

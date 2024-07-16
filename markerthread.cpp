@@ -6,7 +6,6 @@ MarkerThread::MarkerThread(QObject *parent)
     , running(false)
     , currentConfigurationName("")
 {
-    yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 
     AruCoDict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);

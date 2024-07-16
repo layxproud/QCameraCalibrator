@@ -32,7 +32,8 @@ private:
     GraphicsViewContainer *graphicsViewContainer;
 
 private slots:
-    void onCalibrationFinished(bool success, const QString &message);
+    void onTaskFinished(bool success, const QString &message);
     void onNewConfiguration(const std::string &name);
+    void onCalibrationParametersMissing();
 };
 #endif // MAINWINDOW_H

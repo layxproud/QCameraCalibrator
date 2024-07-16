@@ -25,13 +25,16 @@ public:
 signals:
     void frameReady(const cv::Mat &frame);
     void pointSelected(const QPointF &point);
-    void calibrationFinished(bool success, const QString &message);
     void newConfiguration(const std::string &name);
+    void taskFinished(bool success, const QString &message);
+    void calibrationParamsMissing();
 
 public slots:
     void onPageChanged(int page);
     void onCaptureFrame();
     void onStartCalibration();
+    void onMarkerSizeChanged(int size);
+    void onSaveConfiguration();
 
 private:
     YamlHandler *yamlHandler;

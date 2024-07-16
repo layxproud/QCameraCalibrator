@@ -14,16 +14,29 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsViewContainer = new GraphicsViewContainer(this);
     ui->cameraLayout->addWidget(graphicsViewContainer);
 
+    ui->toolBox->setCurrentIndex(0);
+
     connect(ui->captureButton, &QPushButton::clicked, workspace, &Workspace::onCaptureFrame);
     connect(ui->calibrateButton, &QPushButton::clicked, workspace, &Workspace::onStartCalibration);
     connect(ui->toolBox, &QToolBox::currentChanged, workspace, &Workspace::onPageChanged);
+    connect(
+        ui->markerSizeInput,
+        QOverload<int>::of(&QSpinBox::valueChanged),
+        workspace,
+        &Workspace::onMarkerSizeChanged);
+    connect(ui->saveConfigButton, &QPushButton::clicked, workspace, &Workspace::onSaveConfiguration);
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(
         workspace,
         &Workspace::frameReady,
         graphicsViewContainer,
         &GraphicsViewContainer::updateFrame);
-    connect(workspace, &Workspace::calibrationFinished, this, &MainWindow::onCalibrationFinished);
+    connect(workspace, &Workspace::taskFinished, this, &MainWindow::onTaskFinished);
+    connect(
+        workspace,
+        &Workspace::calibrationParamsMissing,
+        this,
+        &MainWindow::onCalibrationParametersMissing);
     connect(workspace, &Workspace::newConfiguration, this, &MainWindow::onNewConfiguration);
 
     workspace->init();
@@ -46,16 +59,21 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     QMainWindow::mousePressEvent(event);
 }
 
-void MainWindow::onCalibrationFinished(bool success, const QString &message)
+void MainWindow::onTaskFinished(bool success, const QString &message)
 {
     if (success) {
-        QMessageBox::information(this, tr("Успешная калибровка"), message);
+        QMessageBox::information(this, tr("Успех"), message);
     } else {
-        QMessageBox::warning(this, tr("Ошибка калибровки"), message);
+        QMessageBox::warning(this, tr("Ошибка"), message);
     }
 }
 
 void MainWindow::onNewConfiguration(const std::string &name)
 {
-    ui->nameInput->setText(QString::fromStdString(name));
+    ui->configNameIInput->setText(QString::fromStdString(name));
+}
+
+void MainWindow::onCalibrationParametersMissing()
+{
+    ui->toolBox->setCurrentIndex(0);
 }

@@ -30,6 +30,8 @@ public:
         const std::string &filename, std::map<std::string, Configuration> &configurations);
     bool saveConfigurations(
         const std::string &filename, const std::map<std::string, Configuration> &configurations);
+
+private:
 };
 
 #endif // YAMLHANDLER_H

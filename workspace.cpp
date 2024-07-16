@@ -14,10 +14,7 @@ Workspace::Workspace(QObject *parent)
     connect(this, &Workspace::pointSelected, markerThread, &MarkerThread::onPointSelected);
     connect(markerThread, &MarkerThread::newConfiguration, this, &Workspace::newConfiguration);
     connect(
-        calibrationThread,
-        &CalibrationThread::calibrationFinished,
-        this,
-        &Workspace::calibrationFinished);
+        calibrationThread, &CalibrationThread::calibrationFinished, this, &Workspace::taskFinished);
 }
 
 Workspace::~Workspace()
@@ -88,9 +85,16 @@ void Workspace::onPageChanged(int page)
         stopThread(markerThread);
         startThread(cameraThread);
     } else {
+        CalibrationParams calibrationParams;
+        if (!yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams)) {
+            emit calibrationParamsMissing();
+            emit taskFinished(false, tr("Не обнаружен файл калибровки. Сначала откалибруйте камеру!"));
+            return;
+        }
         stopThread(cameraThread);
         stopThread(calibrationThread);
         startThread(markerThread);
+        markerThread->setCalibrationParams(calibrationParams);
     }
 }
 
@@ -112,4 +116,15 @@ void Workspace::onCaptureFrame()
 void Workspace::onStartCalibration()
 {
     startThread(calibrationThread);
+}
+
+void Workspace::onMarkerSizeChanged(int size)
+{
+    markerThread->setMarkerSize(size);
+}
+
+void Workspace::onSaveConfiguration()
+{
+    std::map<std::string, Configuration> existingConfigurations = markerThread->getConfigurations();
+    yamlHandler->updateConfigurations("configurations.yml", existingConfigurations);
 }

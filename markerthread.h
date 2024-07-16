@@ -13,6 +13,8 @@ class MarkerThread : public QThread
 public:
     explicit MarkerThread(QObject *parent = nullptr);
     void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
+    void setCalibrationParams(const CalibrationParams &params) { calibrationParams = params; }
+    std::map<std::string, Configuration> getConfigurations() { return configurations; }
     void stop();
 
 signals:
@@ -24,7 +26,7 @@ protected:
 
 public slots:
     void onPointSelected(const QPointF &point);
-    void setMarkerSize(float size) { markerSize = size; }
+    void setMarkerSize(int size) { markerSize = (float) size / 100.0; }
 
 private:
     bool running;
@@ -39,6 +41,7 @@ private:
     cv::aruco::ArucoDetector detector;
     cv::Mat objPoints;
 
+    Configuration currentConfiguration;
     std::map<std::string, Configuration> configurations;
     std::string currentConfigurationName;
 
