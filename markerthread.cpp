@@ -113,7 +113,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
     cv::Point2f clickedPoint2D(point.x(), point.y());
 
     float depth = getDepthAtPoint(clickedPoint2D);
-    cv::Point3f clickedPoint3D = projectTo3D(clickedPoint2D, depth);
+    cv::Point3f clickedPoint3D = projectPointTo3D(clickedPoint2D, depth);
 
     Configuration newConfig;
     newConfig.markerIds = markerIds;
@@ -156,8 +156,6 @@ void MarkerThread::detectCurrentConfiguration()
         }
     }
 
-    qDebug() << QString::fromStdString(new_Configuration.name) << " vs "
-             << QString::fromStdString(currentConfiguration.name);
     if (new_Configuration.name != currentConfiguration.name) {
         emit newConfiguration(new_Configuration.name);
         currentConfiguration = new_Configuration;
@@ -179,7 +177,7 @@ float MarkerThread::getDepthAtPoint(const cv::Point2f &point)
     return depth;
 }
 
-cv::Point3f MarkerThread::projectTo3D(const cv::Point2f &point2D, float depth)
+cv::Point3f MarkerThread::projectPointTo3D(const cv::Point2f &point2D, float depth)
 {
     float x = (point2D.x - calibrationParams.cameraMatrix.at<double>(0, 2))
               / calibrationParams.cameraMatrix.at<double>(0, 0);

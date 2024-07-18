@@ -90,37 +90,75 @@ bool YamlHandler::updateConfigurations(
     loadConfigurations(filename, existingConfigurations);
 
     std::string duplicateName;
+    ConflictType conflict
+        = findDuplicateConfiguration(existingConfigurations, currentConfiguration, duplicateName);
 
-    if (findDuplicateConfiguration(existingConfigurations, currentConfiguration, duplicateName)) {
-        existingConfigurations[duplicateName] = currentConfiguration;
-    } else {
+    switch (conflict) {
+    case ConflictType::None:
         existingConfigurations.insert(
             std::make_pair(currentConfiguration.name, currentConfiguration));
+        break;
+    case ConflictType::ExactMatch:
+        existingConfigurations[duplicateName] = currentConfiguration;
+        break;
+    case ConflictType::Intersection:
+        return false;
     }
 
     saveConfigurations(filename, existingConfigurations);
-
     return true;
 }
 
-bool YamlHandler::findDuplicateConfiguration(
+ConflictType YamlHandler::findDuplicateConfiguration(
     const std::map<std::string, Configuration> &configurations,
     const Configuration &currentConfiguration,
     std::string &duplicateName)
 {
+    bool nameMatches = false;
+    bool markerIdMatches = false;
+    std::string nameMatchConfig;
+    std::string markerIdMatchConfig;
+
+    // First pass to identify potential matches
     for (const auto &entry : configurations) {
         if (entry.second.name == currentConfiguration.name) {
-            duplicateName = entry.first;
-            return true;
+            nameMatches = true;
+            nameMatchConfig = entry.first;
         }
-    }
-
-    for (const auto &entry : configurations) {
         if (entry.second.markerIds == currentConfiguration.markerIds) {
-            duplicateName = entry.first;
-            return true;
+            markerIdMatches = true;
+            markerIdMatchConfig = entry.first;
         }
     }
 
-    return false;
+    // Check for intersection
+    std::vector<int> intersection;
+    bool intersectsExisting = false;
+    for (const auto &entry : configurations) {
+        std::set_intersection(
+            entry.second.markerIds.begin(),
+            entry.second.markerIds.end(),
+            currentConfiguration.markerIds.begin(),
+            currentConfiguration.markerIds.end(),
+            std::back_inserter(intersection));
+        if (!intersection.empty()) {
+            intersectsExisting = true;
+            break;
+        }
+    }
+
+    // Determine conflict type based on matches and intersections
+    if (nameMatches && markerIdMatches && nameMatchConfig != markerIdMatchConfig) {
+        // Special case: name matches one config, marker IDs match another
+        duplicateName = nameMatchConfig;   // Or choose another strategy to report both
+        return ConflictType::Intersection; // Treat as intersection to prevent overwrite
+    } else if (intersectsExisting) {
+        duplicateName = ""; // No specific config to reference, just indicate intersection
+        return ConflictType::Intersection;
+    } else if (nameMatches || markerIdMatches) {
+        duplicateName = nameMatches ? nameMatchConfig : markerIdMatchConfig;
+        return ConflictType::ExactMatch;
+    }
+
+    return ConflictType::None;
 }

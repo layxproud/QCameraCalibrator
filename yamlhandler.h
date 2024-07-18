@@ -17,6 +17,8 @@ struct CalibrationParams
     cv::Mat distCoeffs;
 };
 
+enum class ConflictType { None, ExactMatch, Intersection };
+
 class YamlHandler : public QObject
 {
     Q_OBJECT
@@ -33,7 +35,7 @@ public:
     bool updateConfigurations(const std::string &filename, const Configuration &currentConfiguration);
 
 private:
-    bool findDuplicateConfiguration(
+    ConflictType findDuplicateConfiguration(
         const std::map<std::string, Configuration> &configurations,
         const Configuration &currentConfiguration,
         std::string &duplicateName);

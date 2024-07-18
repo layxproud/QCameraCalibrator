@@ -51,12 +51,11 @@ private:
     std::vector<std::pair<cv::Point2f, cv::Point3f>> markerPoints;
 
     cv::Point3f selectedPoint;
-    cv::Point3f relativeSelectedPoint;
 
     void detectCurrentConfiguration();
 
     float getDepthAtPoint(const cv::Point2f &point);
-    cv::Point3f projectTo3D(const cv::Point2f &point2D, float depth);
+    cv::Point3f projectPointTo3D(const cv::Point2f &point2D, float depth);
     cv::Point3f calculateRelativePosition(
         const cv::Point3f &point3D, const cv::Vec3d &rvec, const cv::Vec3d &tvec);
     void updateSelectedPointPosition();

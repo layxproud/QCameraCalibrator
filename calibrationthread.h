@@ -15,7 +15,6 @@ public:
     explicit CalibrationThread(QObject *parent = nullptr);
 
     void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
-    void setFrames(const std::vector<cv::Mat> &f) { frames = f; }
     void stop();
 
 signals:
