@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,7 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->toolBox->setCurrentIndex(0);
 
+    QShortcut *captuteFrameShortcut = new QShortcut(Qt::Key_Space, ui->captureButton);
+
     connect(ui->captureButton, &QPushButton::clicked, workspace, &Workspace::onCaptureFrame);
+    QObject::connect(
+        captuteFrameShortcut, &QShortcut::activated, workspace, &Workspace::onCaptureFrame);
     connect(ui->calibrateButton, &QPushButton::clicked, workspace, &Workspace::onStartCalibration);
     connect(ui->toolBox, &QToolBox::currentChanged, workspace, &Workspace::onPageChanged);
     connect(

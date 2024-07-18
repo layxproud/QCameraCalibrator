@@ -211,6 +211,8 @@ void MarkerThread::updateSelectedPointPosition()
         return;
     }
     const auto &config = currentConfiguration;
+    std::vector<cv::Point3f> allPoints;
+
     for (int id : config.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), id);
         if (it != markerIds.end()) {
@@ -225,9 +227,24 @@ void MarkerThread::updateSelectedPointPosition()
                    config.relativePoints.at(id).z);
             cv::Mat newPointMat = rotationMatrix * relativePointMat + cv::Mat(tvecs.at(index));
 
-            selectedPoint = cv::Point3f(
-                newPointMat.at<double>(0), newPointMat.at<double>(1), newPointMat.at<double>(2));
-            break;
+            allPoints.push_back(cv::Point3f(
+                newPointMat.at<double>(0), newPointMat.at<double>(1), newPointMat.at<double>(2)));
         }
     }
+
+    if (!allPoints.empty()) {
+        cv::Point3f medianPoint = calculateMedianPoint(allPoints);
+        selectedPoint = medianPoint;
+    }
+}
+
+cv::Point3f MarkerThread::calculateMedianPoint(const std::vector<cv::Point3f> &points)
+{
+    std::vector<cv::Point3f> sortedPoints = points;
+    std::sort(sortedPoints.begin(), sortedPoints.end(), [](const cv::Point3f &a, const cv::Point3f &b) {
+        return a.x < b.x;
+    });
+
+    size_t medianIndex = points.size() / 2;
+    return sortedPoints[medianIndex];
 }

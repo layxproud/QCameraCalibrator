@@ -25,7 +25,6 @@ void CalibrationThread::run()
 {
     running = true;
 
-    // Проверяем наличие изображений в папке
     QString imagesDir = QDir::currentPath() + "/images";
     QDir dir(imagesDir);
     QStringList filters;
@@ -41,7 +40,6 @@ void CalibrationThread::run()
         return;
     }
 
-    // Преобразуем изображения в cv::Mat
     for (const QString &fileName : fileNames) {
         {
             QMutexLocker locker(&mutex);

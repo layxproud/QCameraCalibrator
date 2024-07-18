@@ -59,6 +59,7 @@ private:
     cv::Point3f calculateRelativePosition(
         const cv::Point3f &point3D, const cv::Vec3d &rvec, const cv::Vec3d &tvec);
     void updateSelectedPointPosition();
+    cv::Point3f calculateMedianPoint(const std::vector<cv::Point3f> &points);
 };
 
 #endif // MARKERTHREAD_H

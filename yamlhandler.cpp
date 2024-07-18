@@ -1,6 +1,8 @@
 #include "yamlhandler.h"
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
+#include <QDebug>
 
 YamlHandler::YamlHandler(QObject *parent)
     : QObject(parent)
@@ -97,11 +99,14 @@ bool YamlHandler::updateConfigurations(
     case ConflictType::None:
         existingConfigurations.insert(
             std::make_pair(currentConfiguration.name, currentConfiguration));
+        qDebug() << "NONE";
         break;
     case ConflictType::ExactMatch:
         existingConfigurations[duplicateName] = currentConfiguration;
+        qDebug() << "EXACT MATCH";
         break;
     case ConflictType::Intersection:
+        qDebug() << "INTERSECTION";
         return false;
     }
 
@@ -119,7 +124,7 @@ ConflictType YamlHandler::findDuplicateConfiguration(
     std::string nameMatchConfig;
     std::string markerIdMatchConfig;
 
-    // First pass to identify potential matches
+    // Проверка на совпадения и пересечения
     for (const auto &entry : configurations) {
         if (entry.second.name == currentConfiguration.name) {
             nameMatches = true;
@@ -129,35 +134,42 @@ ConflictType YamlHandler::findDuplicateConfiguration(
             markerIdMatches = true;
             markerIdMatchConfig = entry.first;
         }
-    }
 
-    // Check for intersection
-    std::vector<int> intersection;
-    bool intersectsExisting = false;
-    for (const auto &entry : configurations) {
+        std::unordered_set<int>
+            existingMarkerIds(entry.second.markerIds.begin(), entry.second.markerIds.end());
+        std::unordered_set<int> currentMarkerIds(
+            currentConfiguration.markerIds.begin(), currentConfiguration.markerIds.end());
+
+        std::vector<int> existingSortedMarkerIds(existingMarkerIds.begin(), existingMarkerIds.end());
+        std::vector<int> currentSortedMarkerIds(currentMarkerIds.begin(), currentMarkerIds.end());
+        std::sort(existingSortedMarkerIds.begin(), existingSortedMarkerIds.end());
+        std::sort(currentSortedMarkerIds.begin(), currentSortedMarkerIds.end());
+
+        std::vector<int> intersection;
         std::set_intersection(
-            entry.second.markerIds.begin(),
-            entry.second.markerIds.end(),
-            currentConfiguration.markerIds.begin(),
-            currentConfiguration.markerIds.end(),
+            existingSortedMarkerIds.begin(),
+            existingSortedMarkerIds.end(),
+            currentSortedMarkerIds.begin(),
+            currentSortedMarkerIds.end(),
             std::back_inserter(intersection));
-        if (!intersection.empty()) {
-            intersectsExisting = true;
-            break;
+
+        if (!intersection.empty() && intersection.size() != existingSortedMarkerIds.size()) {
+            duplicateName = "";
+            return ConflictType::Intersection;
         }
     }
 
-    // Determine conflict type based on matches and intersections
-    if (nameMatches && markerIdMatches && nameMatchConfig != markerIdMatchConfig) {
-        // Special case: name matches one config, marker IDs match another
-        duplicateName = nameMatchConfig;   // Or choose another strategy to report both
-        return ConflictType::Intersection; // Treat as intersection to prevent overwrite
-    } else if (intersectsExisting) {
-        duplicateName = ""; // No specific config to reference, just indicate intersection
-        return ConflictType::Intersection;
-    } else if (nameMatches || markerIdMatches) {
-        duplicateName = nameMatches ? nameMatchConfig : markerIdMatchConfig;
+    if (nameMatches && !markerIdMatches) {
+        duplicateName = nameMatchConfig;
         return ConflictType::ExactMatch;
+    } else if (!nameMatches && markerIdMatches) {
+        duplicateName = markerIdMatchConfig;
+        return ConflictType::ExactMatch;
+    } else if (nameMatches && markerIdMatches && nameMatchConfig == markerIdMatchConfig) {
+        duplicateName = nameMatchConfig;
+        return ConflictType::ExactMatch;
+    } else if (nameMatches && markerIdMatches && nameMatchConfig != markerIdMatchConfig) {
+        return ConflictType::Intersection;
     }
 
     return ConflictType::None;
