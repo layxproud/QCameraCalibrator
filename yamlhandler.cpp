@@ -99,14 +99,11 @@ bool YamlHandler::updateConfigurations(
     case ConflictType::None:
         existingConfigurations.insert(
             std::make_pair(currentConfiguration.name, currentConfiguration));
-        qDebug() << "NONE";
         break;
     case ConflictType::ExactMatch:
         existingConfigurations[duplicateName] = currentConfiguration;
-        qDebug() << "EXACT MATCH";
         break;
     case ConflictType::Intersection:
-        qDebug() << "INTERSECTION";
         return false;
     }
 
