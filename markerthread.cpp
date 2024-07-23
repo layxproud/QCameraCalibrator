@@ -5,7 +5,7 @@ MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
 {
-    yamlHandler->loadConfigurations("configurations.yml", configurations);
+    updateConfigurationsMap();
 
     AruCoDict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
     detectorParams = cv::aruco::DetectorParameters();
@@ -138,6 +138,12 @@ void MarkerThread::onPointSelected(const QPointF &point)
     if (tempConfig.name == currentConfiguration.name) {
         currentConfiguration = tempConfig;
     }
+}
+
+void MarkerThread::updateConfigurationsMap()
+{
+    yamlHandler->loadConfigurations("configurations.yml", configurations);
+    currentConfiguration = Configuration{};
 }
 
 void MarkerThread::detectCurrentConfiguration()

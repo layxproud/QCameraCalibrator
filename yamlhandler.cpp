@@ -1,8 +1,6 @@
 #include "yamlhandler.h"
-#include <fstream>
-#include <sstream>
-#include <unordered_set>
 #include <QDebug>
+#include <QFile>
 
 YamlHandler::YamlHandler(QObject *parent)
     : QObject(parent)
@@ -57,6 +55,8 @@ bool YamlHandler::loadConfigurations(
 bool YamlHandler::saveConfigurations(
     const std::string &filename, const std::map<std::string, Configuration> &configurations)
 {
+    QFile::remove(QString::fromStdString(filename));
+
     cv::FileStorage fs(filename, cv::FileStorage::WRITE);
     if (!fs.isOpened())
         return false;
@@ -101,13 +101,23 @@ bool YamlHandler::updateConfigurations(
             std::make_pair(currentConfiguration.name, currentConfiguration));
         break;
     case ConflictType::ExactMatch:
+        qDebug() << "MATCH";
         existingConfigurations[duplicateName] = currentConfiguration;
         break;
     case ConflictType::Intersection:
+        emit taskFinished(
+            false,
+            tr("Обнаружено пересечение конфигураций! Пожалуйста, проверьте выбранное название и "
+               "маркеры."));
         return false;
     }
 
-    saveConfigurations(filename, existingConfigurations);
+    if (!saveConfigurations(filename, existingConfigurations)) {
+        emit taskFinished(false, tr("Не удалось сохранить файл конфигураций!"));
+        return false;
+    }
+
+    emit taskFinished(true, tr("Файл конфигураций успешно обновлен!"));
     return true;
 }
 
@@ -121,36 +131,37 @@ ConflictType YamlHandler::findDuplicateConfiguration(
     std::string nameMatchConfig;
     std::string markerIdMatchConfig;
 
-    // Проверка на совпадения и пересечения
     for (const auto &entry : configurations) {
+        // Проверяем имена
         if (entry.second.name == currentConfiguration.name) {
             nameMatches = true;
             nameMatchConfig = entry.first;
         }
-        if (entry.second.markerIds == currentConfiguration.markerIds) {
+
+        // Конвертируем в адекватный формат
+        std::vector<int> sortedExistingMarkerIds(entry.second.markerIds);
+        std::vector<int> sortedCurrentMarkerIds(currentConfiguration.markerIds);
+
+        std::sort(sortedExistingMarkerIds.begin(), sortedExistingMarkerIds.end());
+        std::sort(sortedCurrentMarkerIds.begin(), sortedCurrentMarkerIds.end());
+
+        // Проверяем маркеры
+        if (sortedExistingMarkerIds == sortedCurrentMarkerIds) {
             markerIdMatches = true;
             markerIdMatchConfig = entry.first;
         }
 
-        std::unordered_set<int>
-            existingMarkerIds(entry.second.markerIds.begin(), entry.second.markerIds.end());
-        std::unordered_set<int> currentMarkerIds(
-            currentConfiguration.markerIds.begin(), currentConfiguration.markerIds.end());
-
-        std::vector<int> existingSortedMarkerIds(existingMarkerIds.begin(), existingMarkerIds.end());
-        std::vector<int> currentSortedMarkerIds(currentMarkerIds.begin(), currentMarkerIds.end());
-        std::sort(existingSortedMarkerIds.begin(), existingSortedMarkerIds.end());
-        std::sort(currentSortedMarkerIds.begin(), currentSortedMarkerIds.end());
-
+        // Ищем пересечения
         std::vector<int> intersection;
         std::set_intersection(
-            existingSortedMarkerIds.begin(),
-            existingSortedMarkerIds.end(),
-            currentSortedMarkerIds.begin(),
-            currentSortedMarkerIds.end(),
+            sortedExistingMarkerIds.begin(),
+            sortedExistingMarkerIds.end(),
+            sortedCurrentMarkerIds.begin(),
+            sortedCurrentMarkerIds.end(),
             std::back_inserter(intersection));
 
-        if (!intersection.empty() && intersection.size() != existingSortedMarkerIds.size()) {
+        // Проверяем результат
+        if (!intersection.empty() && intersection.size() != sortedExistingMarkerIds.size()) {
             duplicateName = "";
             return ConflictType::Intersection;
         }

@@ -27,6 +27,7 @@ protected:
 public slots:
     void onPointSelected(const QPointF &point);
     void setMarkerSize(int size) { markerSize = (float) size / 100.0; }
+    void updateConfigurationsMap();
 
 private:
     bool running;

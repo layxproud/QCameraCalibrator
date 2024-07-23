@@ -34,6 +34,9 @@ public:
         const std::string &filename, const std::map<std::string, Configuration> &configurations);
     bool updateConfigurations(const std::string &filename, const Configuration &currentConfiguration);
 
+signals:
+    void taskFinished(bool success, const QString &message);
+
 private:
     ConflictType findDuplicateConfiguration(
         const std::map<std::string, Configuration> &configurations,

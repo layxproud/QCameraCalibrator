@@ -18,7 +18,7 @@ public:
     void stop();
 
 signals:
-    void calibrationFinished(bool success, const QString &message);
+    void taskFinished(bool success, const QString &message);
 
 protected:
     void run() override;

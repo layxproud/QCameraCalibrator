@@ -29,6 +29,7 @@ signals:
     void newConfiguration(const std::string &name);
     void taskFinished(bool success, const QString &message);
     void calibrationParamsMissing();
+    void configurationsUpdated();
 
 public slots:
     void onPageChanged(int page);

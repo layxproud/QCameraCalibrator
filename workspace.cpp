@@ -14,7 +14,12 @@ Workspace::Workspace(QObject *parent)
     connect(this, &Workspace::pointSelected, markerThread, &MarkerThread::onPointSelected);
     connect(markerThread, &MarkerThread::newConfiguration, this, &Workspace::newConfiguration);
     connect(
-        calibrationThread, &CalibrationThread::calibrationFinished, this, &Workspace::taskFinished);
+        this,
+        &Workspace::configurationsUpdated,
+        markerThread,
+        &MarkerThread::updateConfigurationsMap);
+    connect(calibrationThread, &CalibrationThread::taskFinished, this, &Workspace::taskFinished);
+    connect(yamlHandler, &YamlHandler::taskFinished, this, &Workspace::taskFinished);
 }
 
 Workspace::~Workspace()
@@ -113,6 +118,7 @@ void Workspace::saveConfiguration(const QString &name)
     Configuration currentConfiguration = markerThread->getCurrConfiguration();
     currentConfiguration.name = name.toStdString();
     yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    emit configurationsUpdated();
 }
 
 void Workspace::onCaptureFrame()
