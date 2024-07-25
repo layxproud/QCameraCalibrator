@@ -142,8 +142,8 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
 void MarkerThread::updateConfigurationsMap()
 {
+    configurations.clear();
     yamlHandler->loadConfigurations("configurations.yml", configurations);
-    currentConfiguration = Configuration{};
 }
 
 void MarkerThread::detectCurrentConfiguration()

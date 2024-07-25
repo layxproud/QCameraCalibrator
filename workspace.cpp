@@ -117,8 +117,9 @@ void Workspace::saveConfiguration(const QString &name)
 {
     Configuration currentConfiguration = markerThread->getCurrConfiguration();
     currentConfiguration.name = name.toStdString();
-    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
-    emit configurationsUpdated();
+    if (yamlHandler->updateConfigurations("configurations.yml", currentConfiguration)) {
+        emit configurationsUpdated();
+    }
 }
 
 void Workspace::onCaptureFrame()
