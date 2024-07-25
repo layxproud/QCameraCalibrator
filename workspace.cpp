@@ -1,4 +1,5 @@
 #include "workspace.h"
+#include <QDebug>
 
 Workspace::Workspace(QObject *parent)
     : QObject{parent}
@@ -117,9 +118,8 @@ void Workspace::saveConfiguration(const QString &name)
 {
     Configuration currentConfiguration = markerThread->getCurrConfiguration();
     currentConfiguration.name = name.toStdString();
-    if (yamlHandler->updateConfigurations("configurations.yml", currentConfiguration)) {
-        emit configurationsUpdated();
-    }
+    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    emit configurationsUpdated();
 }
 
 void Workspace::onCaptureFrame()

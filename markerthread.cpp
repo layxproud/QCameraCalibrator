@@ -106,7 +106,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
     QMutexLocker locker(&mutex);
 
     if (markerIds.size() != 4) {
-        qDebug() << "Для конфигурации блока необходимо ровно 4 маркера";
+        emit taskFinished(false, tr("Для конфигурации блока необходимо ровно 4 маркера"));
         return;
     }
 
@@ -143,6 +143,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
 void MarkerThread::updateConfigurationsMap()
 {
     configurations.clear();
+    currentConfiguration.name = "...---..."; // Если была ошибка ввода то имя вернется к нормальному
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 }
 
@@ -162,6 +163,8 @@ void MarkerThread::detectCurrentConfiguration()
         }
     }
 
+    qDebug() << QString::fromStdString(new_Configuration.name) << "vs "
+             << QString::fromStdString(currentConfiguration.name);
     if (new_Configuration.name != currentConfiguration.name) {
         emit newConfiguration(new_Configuration.name);
         currentConfiguration = new_Configuration;

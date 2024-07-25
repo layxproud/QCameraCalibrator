@@ -20,6 +20,7 @@ public:
 signals:
     void frameReady(const cv::Mat &frame);
     void newConfiguration(const std::string &name);
+    void taskFinished(bool success, const QString &message);
 
 protected:
     void run() override;
