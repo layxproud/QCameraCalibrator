@@ -3,6 +3,7 @@
 
 #include "graphicsviewcontainer.h"
 #include "workspace.h"
+#include "yamlhandler.h"
 #include <QMainWindow>
 #include <QMouseEvent>
 
@@ -22,6 +23,7 @@ public:
 
 signals:
     void pointSelected(const QPointF &point);
+    void saveConfiguration(const Configuration &config);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -33,7 +35,7 @@ private:
 
 private slots:
     void onTaskFinished(bool success, const QString &message);
-    void onNewConfiguration(const std::string &name);
+    void onNewConfiguration(const Configuration &config);
     void onCalibrationParametersMissing();
     void onSaveConfiguration();
 };

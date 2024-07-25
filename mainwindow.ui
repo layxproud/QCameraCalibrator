@@ -71,15 +71,18 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout" name="markerSize">
-          <item>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
            <widget class="QLabel" name="markerSizeLabel">
             <property name="text">
              <string>Длина маркера (мм)</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="0" column="1">
            <widget class="QSpinBox" name="markerSizeInput">
             <property name="minimum">
              <number>1</number>
@@ -92,19 +95,38 @@
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="configName">
-          <item>
-           <widget class="QLabel" name="configNameLabel">
+          <item row="1" column="0" colspan="2">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="blockTypeLabel">
             <property name="text">
-             <string>Название</string>
+             <string>Тип блока</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLineEdit" name="configNameInput"/>
+          <item row="3" column="0">
+           <widget class="QLabel" name="blockNameLabel">
+            <property name="text">
+             <string>Название блока</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="blockNameInput"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="blockTypeInput"/>
           </item>
          </layout>
         </item>

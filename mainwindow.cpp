@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QShortcut *captuteFrameShortcut = new QShortcut(Qt::Key_Space, ui->captureButton);
 
+    // Connects from GUI
     connect(ui->captureButton, &QPushButton::clicked, workspace, &Workspace::onCaptureFrame);
     QObject::connect(
         captuteFrameShortcut, &QShortcut::activated, workspace, &Workspace::onCaptureFrame);
@@ -31,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
         &Workspace::onMarkerSizeChanged);
     connect(ui->saveConfigButton, &QPushButton::clicked, this, &MainWindow::onSaveConfiguration);
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
+    connect(this, &MainWindow::saveConfiguration, workspace, &Workspace::saveConfiguration);
+
+    // Connects to GUI
     connect(
         workspace,
         &Workspace::frameReady,
@@ -73,9 +77,10 @@ void MainWindow::onTaskFinished(bool success, const QString &message)
     }
 }
 
-void MainWindow::onNewConfiguration(const std::string &name)
+void MainWindow::onNewConfiguration(const Configuration &config)
 {
-    ui->blockNameInput->setText(QString::fromStdString(name));
+    ui->blockTypeInput->setText(QString::fromStdString(config.type));
+    ui->blockNameInput->setText(QString::fromStdString(config.name));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -85,5 +90,8 @@ void MainWindow::onCalibrationParametersMissing()
 
 void MainWindow::onSaveConfiguration()
 {
-    workspace->saveConfiguration(ui->blockNameInput->text());
+    Configuration newConfiguration{};
+    newConfiguration.name = ui->blockNameInput->text().toStdString();
+    newConfiguration.type = ui->blockTypeInput->text().toStdString();
+    emit saveConfiguration(newConfiguration);
 }

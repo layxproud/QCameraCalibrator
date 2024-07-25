@@ -40,6 +40,7 @@ bool YamlHandler::loadConfigurations(
     for (const auto &configNode : configsNode) {
         Configuration config;
         configNode["Name"] >> config.name;
+        configNode["Type"] >> config.type;
         configNode["MarkerIds"] >> config.markerIds;
         cv::FileNode relativePointsNode = configNode["RelativePoints"];
         for (const auto &relativePointNode : relativePointsNode) {
@@ -66,6 +67,7 @@ bool YamlHandler::saveConfigurations(
     for (const auto &config : configurations) {
         fs << "{";
         fs << "Name" << config.second.name;
+        fs << "Type" << config.second.type;
         fs << "MarkerIds"
            << "[";
         for (int id : config.second.markerIds) {

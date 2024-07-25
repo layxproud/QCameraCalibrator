@@ -21,12 +21,11 @@ public:
     void stopThread(QThread *thread);
     void ensureDirectoryIsClean(const QString &path);
     void clearDirectory(const QString &path);
-    void saveConfiguration(const QString &name);
 
 signals:
     void frameReady(const cv::Mat &frame);
     void pointSelected(const QPointF &point);
-    void newConfiguration(const std::string &name);
+    void newConfiguration(const Configuration &config);
     void taskFinished(bool success, const QString &message);
     void calibrationParamsMissing();
     void configurationsUpdated();
@@ -36,6 +35,7 @@ public slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onMarkerSizeChanged(int size);
+    void saveConfiguration(const Configuration &newConfiguration);
 
 private:
     YamlHandler *yamlHandler;

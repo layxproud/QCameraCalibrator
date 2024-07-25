@@ -114,14 +114,6 @@ void Workspace::clearDirectory(const QString &path)
     }
 }
 
-void Workspace::saveConfiguration(const QString &name)
-{
-    Configuration currentConfiguration = markerThread->getCurrConfiguration();
-    currentConfiguration.name = name.toStdString();
-    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
-    emit configurationsUpdated();
-}
-
 void Workspace::onCaptureFrame()
 {
     cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
@@ -135,4 +127,13 @@ void Workspace::onStartCalibration()
 void Workspace::onMarkerSizeChanged(int size)
 {
     markerThread->setMarkerSize(size);
+}
+
+void Workspace::saveConfiguration(const Configuration &newConfiguration)
+{
+    Configuration currentConfiguration = markerThread->getCurrConfiguration();
+    currentConfiguration.type = newConfiguration.type;
+    currentConfiguration.name = newConfiguration.name;
+    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    emit configurationsUpdated();
 }

@@ -19,7 +19,7 @@ public:
 
 signals:
     void frameReady(const cv::Mat &frame);
-    void newConfiguration(const std::string &name);
+    void newConfiguration(const Configuration &config);
     void taskFinished(bool success, const QString &message);
 
 protected:
