@@ -75,7 +75,7 @@ void MainWindow::onTaskFinished(bool success, const QString &message)
 
 void MainWindow::onNewConfiguration(const std::string &name)
 {
-    ui->configNameInput->setText(QString::fromStdString(name));
+    ui->blockNameInput->setText(QString::fromStdString(name));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -85,5 +85,5 @@ void MainWindow::onCalibrationParametersMissing()
 
 void MainWindow::onSaveConfiguration()
 {
-    workspace->saveConfiguration(ui->configNameInput->text());
+    workspace->saveConfiguration(ui->blockNameInput->text());
 }

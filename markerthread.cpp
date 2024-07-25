@@ -142,7 +142,6 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
 void MarkerThread::updateConfigurationsMap()
 {
-    //    configurations.clear();
     currentConfiguration.name = "...---..."; // Если была ошибка ввода то имя вернется к нормальному
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 }
