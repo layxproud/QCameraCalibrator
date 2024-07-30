@@ -13,6 +13,7 @@ CONFIG += c++17
 SOURCES += \
     calibrationthread.cpp \
     camerathread.cpp \
+    configurationswidget.cpp \
     graphicsviewcontainer.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 HEADERS += \
     calibrationthread.h \
     camerathread.h \
+    configurationswidget.h \
     graphicsviewcontainer.h \
     mainwindow.h \
     markerthread.h \

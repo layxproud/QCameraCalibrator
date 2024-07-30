@@ -17,10 +17,7 @@ public:
     ~Workspace();
 
     void init();
-    void startThread(QThread *thread);
-    void stopThread(QThread *thread);
-    void ensureDirectoryIsClean(const QString &path);
-    void clearDirectory(const QString &path);
+    std::map<std::string, Configuration> getConfigurations();
 
 signals:
     void frameReady(const cv::Mat &frame);
@@ -45,6 +42,11 @@ private:
 
     int frameNumber;
     QString imagesDir;
+
+    void startThread(QThread *thread);
+    void stopThread(QThread *thread);
+    void ensureDirectoryIsClean(const QString &path);
+    void clearDirectory(const QString &path);
 };
 
 #endif // WORKSPACE_H

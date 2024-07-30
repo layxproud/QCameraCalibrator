@@ -115,7 +115,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
     float depth = getDepthAtPoint(clickedPoint2D);
     cv::Point3f clickedPoint3D = projectPointTo3D(clickedPoint2D, depth);
 
-    Configuration newConfig;
+    Configuration newConfig = Configuration{};
     newConfig.markerIds = markerIds;
     newConfig.name = currentConfiguration.name.empty() ? "Новая конфигурация"
                                                        : currentConfiguration.name;
@@ -149,8 +149,7 @@ void MarkerThread::updateConfigurationsMap()
 
 void MarkerThread::detectCurrentConfiguration()
 {
-    Configuration new_Configuration;
-    new_Configuration.name = "";
+    Configuration new_Configuration = Configuration{};
     for (const auto &config : configurations) {
         for (int id : config.second.markerIds) {
             if (std::find(markerIds.begin(), markerIds.end(), id) != markerIds.end()) {

@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "configurationswidget.h"
 #include "graphicsviewcontainer.h"
 #include "workspace.h"
 #include "yamlhandler.h"
@@ -32,11 +33,14 @@ private:
     Ui::MainWindow *ui;
     Workspace *workspace;
     GraphicsViewContainer *graphicsViewContainer;
+    ConfigurationsWidget *configurationsWidget;
 
 private slots:
     void onTaskFinished(bool success, const QString &message);
     void onNewConfiguration(const Configuration &config);
     void onCalibrationParametersMissing();
     void onSaveConfiguration();
+    void onCofigurationsUpdated();
 };
+
 #endif // MAINWINDOW_H

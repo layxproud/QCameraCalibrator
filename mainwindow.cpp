@@ -9,13 +9,14 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , workspace(new Workspace(this))
+    , graphicsViewContainer(new GraphicsViewContainer(this))
+    , configurationsWidget(new ConfigurationsWidget(this))
 {
     ui->setupUi(this);
     resize(960, 560);
 
-    graphicsViewContainer = new GraphicsViewContainer(this);
     ui->cameraLayout->addWidget(graphicsViewContainer);
-
+    ui->editorLayout->addWidget(configurationsWidget);
     ui->toolBox->setCurrentIndex(0);
 
     QShortcut *captuteFrameShortcut = new QShortcut(Qt::Key_Space, ui->captureButton);
@@ -34,6 +35,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->saveConfigButton, &QPushButton::clicked, this, &MainWindow::onSaveConfiguration);
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(this, &MainWindow::saveConfiguration, workspace, &Workspace::saveConfiguration);
+    connect(
+        configurationsWidget,
+        &ConfigurationsWidget::editConfiguration,
+        this,
+        &MainWindow::saveConfiguration);
 
     // Connects to GUI
     connect(
@@ -48,8 +54,10 @@ MainWindow::MainWindow(QWidget *parent)
         this,
         &MainWindow::onCalibrationParametersMissing);
     connect(workspace, &Workspace::newConfiguration, this, &MainWindow::onNewConfiguration);
+    connect(workspace, &Workspace::configurationsUpdated, this, &MainWindow::onCofigurationsUpdated);
 
     workspace->init();
+    configurationsWidget->setConfigurations(workspace->getConfigurations());
 }
 
 MainWindow::~MainWindow()
@@ -83,6 +91,7 @@ void MainWindow::onNewConfiguration(const Configuration &config)
     ui->blockTypeInput->setText(QString::fromStdString(config.type));
     ui->blockNameInput->setText(QString::fromStdString(config.name));
     ui->blockDateInput->setText(QString::fromStdString(config.date));
+    ui->blockIdInput->setText(QString::number(config.id));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -98,4 +107,9 @@ void MainWindow::onSaveConfiguration()
     newConfiguration.date
         = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
     emit saveConfiguration(newConfiguration);
+}
+
+void MainWindow::onCofigurationsUpdated()
+{
+    configurationsWidget->setConfigurations(workspace->getConfigurations());
 }

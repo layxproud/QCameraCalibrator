@@ -39,6 +39,7 @@ bool YamlHandler::loadConfigurations(
     cv::FileNode configsNode = fs["Configurations"];
     for (const auto &configNode : configsNode) {
         Configuration config;
+        configNode["ID"] >> config.id;
         configNode["Name"] >> config.name;
         configNode["Type"] >> config.type;
         configNode["Date"] >> config.date;
@@ -59,6 +60,7 @@ bool YamlHandler::saveConfigurations(
 {
     QFile::remove(QString::fromStdString(filename));
 
+    int blockID = 1;
     cv::FileStorage fs(filename, cv::FileStorage::WRITE);
     if (!fs.isOpened())
         return false;
@@ -67,6 +69,7 @@ bool YamlHandler::saveConfigurations(
        << "[";
     for (const auto &config : configurations) {
         fs << "{";
+        fs << "ID" << blockID;
         fs << "Name" << config.second.name;
         fs << "Type" << config.second.type;
         fs << "Date" << config.second.date;
@@ -83,6 +86,7 @@ bool YamlHandler::saveConfigurations(
         }
         fs << "}";
         fs << "}";
+        blockID++;
     }
     fs << "]";
     fs.release();

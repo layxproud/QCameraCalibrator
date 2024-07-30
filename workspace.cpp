@@ -39,6 +39,40 @@ void Workspace::init()
     ensureDirectoryIsClean(imagesDir);
 }
 
+std::map<std::string, Configuration> Workspace::getConfigurations()
+{
+    std::map<std::string, Configuration> configurations;
+    yamlHandler->loadConfigurations("configurations.yml", configurations);
+    return configurations;
+}
+
+void Workspace::onCaptureFrame()
+{
+    cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
+}
+
+void Workspace::onStartCalibration()
+{
+    startThread(calibrationThread);
+}
+
+void Workspace::onMarkerSizeChanged(int size)
+{
+    markerThread->setMarkerSize(size);
+}
+
+void Workspace::saveConfiguration(const Configuration &newConfiguration)
+{
+    // Получаю текущую конфигурацию потому из треда маркеров,
+    // потому что информация о маркерах и положении цента известна только там
+    Configuration currentConfiguration = markerThread->getCurrConfiguration();
+    currentConfiguration.type = newConfiguration.type;
+    currentConfiguration.name = newConfiguration.name;
+    currentConfiguration.date = newConfiguration.date;
+    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    emit configurationsUpdated();
+}
+
 void Workspace::startThread(QThread *thread)
 {
     if (thread && !thread->isRunning()) {
@@ -112,31 +146,4 @@ void Workspace::clearDirectory(const QString &path)
     foreach (QString dirFile, dir.entryList()) {
         dir.remove(dirFile);
     }
-}
-
-void Workspace::onCaptureFrame()
-{
-    cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
-}
-
-void Workspace::onStartCalibration()
-{
-    startThread(calibrationThread);
-}
-
-void Workspace::onMarkerSizeChanged(int size)
-{
-    markerThread->setMarkerSize(size);
-}
-
-void Workspace::saveConfiguration(const Configuration &newConfiguration)
-{
-    // Получаю текущую конфигурацию потому из треда маркеров,
-    // потому что информация о маркерах и положении цента известна только там
-    Configuration currentConfiguration = markerThread->getCurrConfiguration();
-    currentConfiguration.type = newConfiguration.type;
-    currentConfiguration.name = newConfiguration.name;
-    currentConfiguration.date = newConfiguration.date;
-    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
-    emit configurationsUpdated();
 }

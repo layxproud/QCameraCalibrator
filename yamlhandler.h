@@ -6,6 +6,7 @@
 
 struct Configuration
 {
+    int id;
     std::string name;
     std::string type;
     std::string date;
