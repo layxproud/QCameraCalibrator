@@ -117,7 +117,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
     Configuration newConfig;
     newConfig.markerIds = markerIds;
-    newConfig.name = currentConfiguration.name.empty() ? "New Configuration"
+    newConfig.name = currentConfiguration.name.empty() ? "Новая конфигурация"
                                                        : currentConfiguration.name;
 
     for (int markerId : newConfig.markerIds) {

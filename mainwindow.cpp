@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDateTime>
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
@@ -81,6 +82,7 @@ void MainWindow::onNewConfiguration(const Configuration &config)
 {
     ui->blockTypeInput->setText(QString::fromStdString(config.type));
     ui->blockNameInput->setText(QString::fromStdString(config.name));
+    ui->blockDateInput->setText(QString::fromStdString(config.date));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -93,5 +95,7 @@ void MainWindow::onSaveConfiguration()
     Configuration newConfiguration{};
     newConfiguration.name = ui->blockNameInput->text().toStdString();
     newConfiguration.type = ui->blockTypeInput->text().toStdString();
+    newConfiguration.date
+        = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
     emit saveConfiguration(newConfiguration);
 }

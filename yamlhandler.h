@@ -8,6 +8,7 @@ struct Configuration
 {
     std::string name;
     std::string type;
+    std::string date;
     std::vector<int> markerIds;
     std::map<int, cv::Point3f> relativePoints;
 };

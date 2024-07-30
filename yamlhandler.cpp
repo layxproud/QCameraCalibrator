@@ -41,6 +41,7 @@ bool YamlHandler::loadConfigurations(
         Configuration config;
         configNode["Name"] >> config.name;
         configNode["Type"] >> config.type;
+        configNode["Date"] >> config.date;
         configNode["MarkerIds"] >> config.markerIds;
         cv::FileNode relativePointsNode = configNode["RelativePoints"];
         for (const auto &relativePointNode : relativePointsNode) {
@@ -68,6 +69,7 @@ bool YamlHandler::saveConfigurations(
         fs << "{";
         fs << "Name" << config.second.name;
         fs << "Type" << config.second.type;
+        fs << "Date" << config.second.date;
         fs << "MarkerIds"
            << "[";
         for (int id : config.second.markerIds) {
@@ -103,7 +105,6 @@ bool YamlHandler::updateConfigurations(
             std::make_pair(currentConfiguration.name, currentConfiguration));
         break;
     case ConflictType::ExactMatch:
-        qDebug() << "MATCH";
         existingConfigurations[duplicateName] = currentConfiguration;
         break;
     case ConflictType::Intersection:
