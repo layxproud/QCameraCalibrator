@@ -32,7 +32,7 @@ ConfigurationForm::ConfigurationForm(QWidget *parent)
 
 void ConfigurationForm::setData(const Configuration &config)
 {
-    blockIdInput->setText(QString::number(config.id));
+    blockIdInput->setText(QString::fromStdString(config.id));
     blockTypeInput->setText(QString::fromStdString(config.type));
     blockNameInput->setText(QString::fromStdString(config.name));
     blockDateInput->setText(QString::fromStdString(config.date));
@@ -41,6 +41,7 @@ void ConfigurationForm::setData(const Configuration &config)
 Configuration ConfigurationForm::getData()
 {
     Configuration config{};
+    config.id = blockIdInput->text().toStdString();
     config.name = blockNameInput->text().toStdString();
     config.type = blockTypeInput->text().toStdString();
     config.date = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();

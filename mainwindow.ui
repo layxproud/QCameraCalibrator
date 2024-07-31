@@ -25,8 +25,14 @@
     </item>
     <item>
      <widget class="QToolBox" name="toolBox">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="calibrationPage">
        <property name="geometry">
@@ -184,6 +190,14 @@
        </layout>
       </widget>
       <widget class="QWidget" name="editorPage">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>952</width>
+         <height>443</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Редактор конфигураций</string>
        </attribute>

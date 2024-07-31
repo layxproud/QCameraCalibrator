@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     , configurationsWidget(new ConfigurationsWidget(this))
 {
     ui->setupUi(this);
-    resize(960, 560);
+    resize(1180, 560);
 
     ui->cameraLayout->addWidget(graphicsViewContainer);
     ui->editorLayout->addWidget(configurationsWidget);
@@ -92,7 +92,7 @@ void MainWindow::onNewConfiguration(const Configuration &config)
     ui->blockTypeInput->setText(QString::fromStdString(config.type));
     ui->blockNameInput->setText(QString::fromStdString(config.name));
     ui->blockDateInput->setText(QString::fromStdString(config.date));
-    ui->blockIdInput->setText(QString::number(config.id));
+    ui->blockIdInput->setText(QString::fromStdString(config.id));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -107,6 +107,11 @@ void MainWindow::onSaveConfiguration()
     newConfiguration.type = ui->blockTypeInput->text().toStdString();
     newConfiguration.date
         = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
+    if (ui->blockIdInput->text() == "") {
+        QUuid uuid = QUuid::createUuid();
+        QString uuidString = uuid.toString(QUuid::WithoutBraces);
+        newConfiguration.id = uuidString.toStdString();
+    }
     emit saveConfiguration(newConfiguration);
 }
 

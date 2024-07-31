@@ -71,7 +71,6 @@ bool YamlHandler::saveConfigurations(
 {
     QFile::remove(QString::fromStdString(filename));
 
-    int blockID = 1;
     cv::FileStorage fs(filename, cv::FileStorage::WRITE);
     if (!fs.isOpened())
         return false;
@@ -80,7 +79,7 @@ bool YamlHandler::saveConfigurations(
        << "[";
     for (const auto &config : configurations) {
         fs << "{";
-        fs << "ID" << blockID;
+        fs << "ID" << config.second.id;
         fs << "Name" << config.second.name;
         fs << "Type" << config.second.type;
         fs << "Date" << config.second.date;
@@ -93,11 +92,10 @@ bool YamlHandler::saveConfigurations(
         fs << "RelativePoints"
            << "{";
         for (const auto &relativePoint : config.second.relativePoints) {
-            fs << "Marker_" + std::to_string(relativePoint.first) << relativePoint.second;
+            fs << ("Marker_" + std::to_string(relativePoint.first)) << relativePoint.second;
         }
         fs << "}";
         fs << "}";
-        blockID++;
     }
     fs << "]";
     fs.release();
