@@ -66,6 +66,7 @@ void Workspace::saveConfiguration(const Configuration &newConfiguration)
     // Получаю текущую конфигурацию потому из треда маркеров,
     // потому что информация о маркерах и положении цента известна только там
     Configuration currentConfiguration = markerThread->getCurrConfiguration();
+    currentConfiguration.id = newConfiguration.id;
     currentConfiguration.type = newConfiguration.type;
     currentConfiguration.name = newConfiguration.name;
     currentConfiguration.date = newConfiguration.date;

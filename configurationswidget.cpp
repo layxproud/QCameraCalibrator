@@ -1,4 +1,5 @@
 #include "configurationswidget.h"
+#include "section.h"
 #include <QDateTime>
 
 ConfigurationForm::ConfigurationForm(QWidget *parent)
@@ -16,12 +17,15 @@ ConfigurationForm::ConfigurationForm(QWidget *parent)
     blockDateInput = new QLineEdit(this);
     blockDateInput->setReadOnly(true);
 
-    formLayout = new QFormLayout(this);
+    editButton = new QPushButton(tr("Редактировать"), this);
+    connect(editButton, &QPushButton::clicked, this, &ConfigurationForm::onEditButton);
 
+    formLayout = new QFormLayout(this);
     formLayout->addRow(blockIdLabel, blockIdInput);
     formLayout->addRow(blockNameLabel, blockNameInput);
     formLayout->addRow(blockTypeLabel, blockTypeInput);
     formLayout->addRow(blockDateLabel, blockDateInput);
+    formLayout->addRow(editButton);
 
     setLayout(formLayout);
 }
@@ -43,85 +47,62 @@ Configuration ConfigurationForm::getData()
     return config;
 }
 
+void ConfigurationForm::onEditButton()
+{
+    emit editConfiguration(getData());
+}
+
 ConfigurationsWidget::ConfigurationsWidget(QWidget *parent)
-    : QStackedWidget(parent)
+    : QWidget(parent)
 {}
 
 void ConfigurationsWidget::setConfigurations(
     const std::map<std::string, Configuration> &configurations)
 {
-    for (int i = this->count(); i >= 0; i--) {
-        QWidget *widget = this->widget(i);
-        this->removeWidget(widget);
+    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout *>(this->layout());
+
+    if (!mainLayout) {
+        mainLayout = new QVBoxLayout(this);
+    } else {
+        clearLayout(mainLayout);
     }
 
     if (configurations.empty()) {
-        QWidget *placeholderWidget = new QWidget();
-        QVBoxLayout *layout = new QVBoxLayout(placeholderWidget);
-        QLabel *messageLabel
-            = new QLabel(tr("Файл конфигураций не обнаружен или файл пуст"), placeholderWidget);
-        layout->addWidget(messageLabel);
-        this->addWidget(placeholderWidget);
+        QLabel *messageLabel = new QLabel(tr("Файл конфигураций не обнаружен или файл пуст"));
+        mainLayout->addWidget(messageLabel);
     } else {
         for (const auto &pair : configurations) {
-            QWidget *pageContainer = new QWidget();
-            QVBoxLayout *pageLayout = new QVBoxLayout(pageContainer);
-
+            Section *section = new Section(pair.second.name.c_str(), 300, this);
+            QVBoxLayout *contentLayout = new QVBoxLayout();
             ConfigurationForm *widget = new ConfigurationForm();
             widget->setData(pair.second);
-            pageLayout->addWidget(widget);
-
-            QPushButton *editButton = new QPushButton(tr("Редактировать"), pageContainer);
-            connect(editButton, &QPushButton::clicked, this, &ConfigurationsWidget::onEditButton);
-            pageLayout->addWidget(editButton);
-
-            QPushButton *backButton = new QPushButton(tr("Назад"), pageContainer);
-            QPushButton *forwardButton = new QPushButton(tr("Вперед"), pageContainer);
-
-            connect(backButton, &QPushButton::clicked, this, &ConfigurationsWidget::goBack);
-            connect(forwardButton, &QPushButton::clicked, this, &ConfigurationsWidget::goForward);
-
-            QHBoxLayout *buttonLayout = new QHBoxLayout();
-            buttonLayout->addWidget(backButton);
-            buttonLayout->addWidget(forwardButton);
-            pageLayout->addLayout(buttonLayout);
-
-            this->addWidget(pageContainer);
+            connect(
+                widget,
+                &ConfigurationForm::editConfiguration,
+                this,
+                &ConfigurationsWidget::editConfiguration);
+            contentLayout->addWidget(widget);
+            section->setContentLayout(*contentLayout);
+            mainLayout->addWidget(section);
         }
+        mainLayout->addStretch(1);
+    }
+    if (!this->layout()) {
+        this->setLayout(mainLayout);
     }
 }
 
-void ConfigurationsWidget::goBack()
+void ConfigurationsWidget::clearLayout(QLayout *layout)
 {
-    int currentIndex = this->currentIndex();
-    if (currentIndex > 0) {
-        this->setCurrentIndex(currentIndex - 1);
-    }
-}
+    Q_ASSERT(layout != nullptr);
 
-void ConfigurationsWidget::goForward()
-{
-    int currentIndex = this->currentIndex();
-    int totalWidgets = this->count();
-    if (currentIndex < totalWidgets - 1) {
-        this->setCurrentIndex(currentIndex + 1);
-    }
-}
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        QWidget *widget = item->widget();
 
-void ConfigurationsWidget::onEditButton()
-{
-    QWidget *currentPageContainer = this->currentWidget();
-
-    if (!currentPageContainer) {
-        return;
-    }
-
-    foreach (QObject *obj, currentPageContainer->children()) {
-        ConfigurationForm *currentConfigForm = qobject_cast<ConfigurationForm *>(obj);
-
-        if (currentConfigForm != nullptr) {
-            emit editConfiguration(currentConfigForm->getData());
-            break;
+        if (widget) {
+            delete widget;
+        } else {
+            delete item;
         }
     }
 }

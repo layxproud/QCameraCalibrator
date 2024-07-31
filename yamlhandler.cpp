@@ -32,27 +32,38 @@ bool YamlHandler::saveCalibrationParameters(
 bool YamlHandler::loadConfigurations(
     const std::string &filename, std::map<std::string, Configuration> &configurations)
 {
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-    if (!fs.isOpened())
-        return false;
+    try {
+        cv::FileStorage fs(filename, cv::FileStorage::READ);
+        if (!fs.isOpened())
+            return false;
 
-    cv::FileNode configsNode = fs["Configurations"];
-    for (const auto &configNode : configsNode) {
-        Configuration config;
-        configNode["ID"] >> config.id;
-        configNode["Name"] >> config.name;
-        configNode["Type"] >> config.type;
-        configNode["Date"] >> config.date;
-        configNode["MarkerIds"] >> config.markerIds;
-        cv::FileNode relativePointsNode = configNode["RelativePoints"];
-        for (const auto &relativePointNode : relativePointsNode) {
-            int markerId = std::stoi(relativePointNode.name().substr(7));
-            relativePointNode >> config.relativePoints[markerId];
+        cv::FileNode configsNode = fs["Configurations"];
+        for (const auto &configNode : configsNode) {
+            Configuration config;
+            configNode["ID"] >> config.id;
+            configNode["Name"] >> config.name;
+            configNode["Type"] >> config.type;
+            configNode["Date"] >> config.date;
+            configNode["MarkerIds"] >> config.markerIds;
+            cv::FileNode relativePointsNode = configNode["RelativePoints"];
+            for (const auto &relativePointNode : relativePointsNode) {
+                int markerId = std::stoi(relativePointNode.name().substr(7));
+                relativePointNode >> config.relativePoints[markerId];
+            }
+            configurations.insert(std::make_pair(config.name, config));
         }
-        configurations.insert(std::make_pair(config.name, config));
+        fs.release();
+        return true;
+    } catch (const cv::Exception &e) {
+        std::cerr << "OpenCV exception caught: " << e.what() << std::endl;
+        return false;
+    } catch (const std::exception &e) {
+        std::cerr << "Standard exception caught: " << e.what() << std::endl;
+        return false;
+    } catch (...) {
+        std::cerr << "Unknown exception caught" << std::endl;
+        return false;
     }
-    fs.release();
-    return true;
 }
 
 bool YamlHandler::saveConfigurations(

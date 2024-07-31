@@ -18,6 +18,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     markerthread.cpp \
+    section.cpp \
     workspace.cpp \
     yamlhandler.cpp
 
@@ -28,6 +29,7 @@ HEADERS += \
     graphicsviewcontainer.h \
     mainwindow.h \
     markerthread.h \
+    section.h \
     workspace.h \
     yamlhandler.h
 

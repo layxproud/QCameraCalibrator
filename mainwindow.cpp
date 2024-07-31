@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QUuid>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
