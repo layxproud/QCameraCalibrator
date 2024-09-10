@@ -26,7 +26,11 @@ void MarkerThread::stop()
 
 void MarkerThread::run()
 {
-    cap.open(0);
+    cv::Mat resizedImage;
+    cv::Size newSize(640, 480);
+
+    // cap.open(0);
+    cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
 
     if (!cap.isOpened())
         return;
@@ -42,6 +46,8 @@ void MarkerThread::run()
         {
             QMutexLocker locker(&mutex);
             currentFrame = frame.clone();
+            // resizedImage = currentFrame.clone(); // Для теста ресайза
+            cv::resize(currentFrame, resizedImage, newSize);
 
             markerIds.clear();
             markerPoints.clear();
@@ -49,10 +55,10 @@ void MarkerThread::run()
             tvecs.clear();
 
             std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCorners;
-            detector.detectMarkers(frame, markerCorners, markerIds, rejectedCorners);
+            detector.detectMarkers(resizedImage, markerCorners, markerIds, rejectedCorners);
 
             if (markerIds.size() > 0) {
-                cv::aruco::drawDetectedMarkers(currentFrame, markerCorners, markerIds);
+                cv::aruco::drawDetectedMarkers(resizedImage, markerCorners, markerIds);
 
                 int nMarkers = markerCorners.size();
                 rvecs.resize(nMarkers);
@@ -88,14 +94,13 @@ void MarkerThread::run()
                         calibrationParams.distCoeffs,
                         points2D);
 
-                    cv::circle(currentFrame, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
+                    cv::circle(resizedImage, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
                 }
             } else {
                 detectCurrentConfiguration();
             }
-            emit frameReady(currentFrame);
+            emit frameReady(resizedImage);
         }
-        msleep(30);
     }
 
     cap.release();
