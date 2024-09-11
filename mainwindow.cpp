@@ -111,6 +111,8 @@ void MainWindow::onSaveConfiguration()
         QUuid uuid = QUuid::createUuid();
         QString uuidString = uuid.toString(QUuid::WithoutBraces);
         newConfiguration.id = uuidString.toStdString();
+    } else {
+        newConfiguration.id = ui->blockIdInput->text().toStdString();
     }
     emit saveConfiguration(newConfiguration);
 }
