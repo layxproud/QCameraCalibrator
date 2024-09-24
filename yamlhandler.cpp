@@ -137,6 +137,29 @@ bool YamlHandler::updateConfigurations(
     return true;
 }
 
+bool YamlHandler::removeConfiguration(
+    const std::string &filename, const Configuration &configToRemove)
+{
+    std::map<std::string, Configuration> existingConfigurations;
+    loadConfigurations(filename, existingConfigurations);
+
+    auto it = existingConfigurations.find(configToRemove.name);
+    if (it == existingConfigurations.end()) {
+        emit taskFinished(false, tr("Конфигурация не найдена для удаления!"));
+        return false;
+    }
+
+    existingConfigurations.erase(it);
+
+    if (!saveConfigurations(filename, existingConfigurations)) {
+        emit taskFinished(false, tr("Не удалось сохранить файл конфигураций!"));
+        return false;
+    }
+
+    emit taskFinished(true, tr("Конфигурация успешно удалена из файла!"));
+    return true;
+}
+
 ConflictType YamlHandler::findDuplicateConfiguration(
     const std::map<std::string, Configuration> &configurations,
     const Configuration &currentConfiguration,

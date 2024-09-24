@@ -32,7 +32,8 @@ public slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onMarkerSizeChanged(int size);
-    void saveConfiguration(const Configuration &newConfiguration);
+    void saveConfiguration(const Configuration &newConfiguration, bool calledFromConfigWidget);
+    void removeConfiguration(const Configuration &config);
 
 private:
     YamlHandler *yamlHandler;

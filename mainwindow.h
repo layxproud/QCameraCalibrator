@@ -24,7 +24,7 @@ public:
 
 signals:
     void pointSelected(const QPointF &point);
-    void saveConfiguration(const Configuration &config);
+    void saveConfiguration(const Configuration &config, bool calledFromConfigWidget);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

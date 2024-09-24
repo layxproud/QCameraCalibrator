@@ -18,7 +18,8 @@ public:
     Configuration getData();
 
 signals:
-    void editConfiguration(const Configuration &config);
+    void editConfiguration(const Configuration &config, bool calledFromConfigWidget);
+    void removeConfiguration(const Configuration &config);
 
 private:
     QFormLayout *formLayout;
@@ -26,14 +27,20 @@ private:
     QLabel *blockNameLabel;
     QLabel *blockTypeLabel;
     QLabel *blockDateLabel;
+    QLabel *emptyLabel;
     QLineEdit *blockIdInput;
     QLineEdit *blockNameInput;
     QLineEdit *blockTypeInput;
     QLineEdit *blockDateInput;
     QPushButton *editButton;
+    QPushButton *deleteButton;
+
+    std::vector<int> markerIds;
+    std::map<int, cv::Point3f> relativePoints;
 
 private slots:
     void onEditButton();
+    void onDeleteButton();
 };
 
 class ConfigurationsWidget : public QWidget
@@ -45,7 +52,8 @@ public:
     void setConfigurations(const std::map<std::string, Configuration> &configurations);
 
 signals:
-    void editConfiguration(const Configuration &config);
+    void editConfiguration(const Configuration &config, bool calledFromConfigWidget);
+    void removeConfiguration(const Configuration &config);
 
 private:
     void clearLayout(QLayout *layout);

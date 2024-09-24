@@ -39,8 +39,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(
         configurationsWidget,
         &ConfigurationsWidget::editConfiguration,
-        this,
-        &MainWindow::saveConfiguration);
+        workspace,
+        &Workspace::saveConfiguration);
+    connect(
+        configurationsWidget,
+        &ConfigurationsWidget::removeConfiguration,
+        workspace,
+        &Workspace::removeConfiguration);
 
     // Connects to GUI
     connect(
@@ -89,10 +94,10 @@ void MainWindow::onTaskFinished(bool success, const QString &message)
 
 void MainWindow::onNewConfiguration(const Configuration &config)
 {
-    ui->blockTypeInput->setText(QString::fromStdString(config.type));
-    ui->blockNameInput->setText(QString::fromStdString(config.name));
-    ui->blockDateInput->setText(QString::fromStdString(config.date));
     ui->blockIdInput->setText(QString::fromStdString(config.id));
+    ui->blockDateInput->setText(QString::fromStdString(config.date));
+    ui->blockNameInput->setText(QString::fromStdString(config.name));
+    ui->blockTypeInput->setText(QString::fromStdString(config.type));  
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -114,7 +119,7 @@ void MainWindow::onSaveConfiguration()
     } else {
         newConfiguration.id = ui->blockIdInput->text().toStdString();
     }
-    emit saveConfiguration(newConfiguration);
+    emit saveConfiguration(newConfiguration, false);
 }
 
 void MainWindow::onCofigurationsUpdated()

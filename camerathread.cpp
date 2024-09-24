@@ -17,8 +17,8 @@ void CameraThread::run()
     cv::Mat resizedFrame;
     cv::Size newSize(640, 480);
 
-    cap.open(0); // for webcam
-    // cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
+    // cap.open(0); // for webcam
+    cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
 
     if (!cap.isOpened())
         return;

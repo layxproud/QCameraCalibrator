@@ -9,6 +9,7 @@ ConfigurationForm::ConfigurationForm(QWidget *parent)
     blockNameLabel = new QLabel(tr("Имя блока"), this);
     blockTypeLabel = new QLabel(tr("Тип блока"), this);
     blockDateLabel = new QLabel(tr("Дата создания"), this);
+    emptyLabel = new QLabel(this);
 
     blockIdInput = new QLineEdit(this);
     blockIdInput->setReadOnly(true);
@@ -19,13 +20,15 @@ ConfigurationForm::ConfigurationForm(QWidget *parent)
 
     editButton = new QPushButton(tr("Редактировать"), this);
     connect(editButton, &QPushButton::clicked, this, &ConfigurationForm::onEditButton);
+    deleteButton = new QPushButton(tr("Удалить"), this);
+    connect(deleteButton, &QPushButton::clicked, this, &ConfigurationForm::onDeleteButton);
 
     formLayout = new QFormLayout(this);
     formLayout->addRow(blockIdLabel, blockIdInput);
+    formLayout->addRow(blockDateLabel, blockDateInput);
     formLayout->addRow(blockNameLabel, blockNameInput);
     formLayout->addRow(blockTypeLabel, blockTypeInput);
-    formLayout->addRow(blockDateLabel, blockDateInput);
-    formLayout->addRow(editButton);
+    formLayout->addRow(deleteButton, editButton);
 
     setLayout(formLayout);
 }
@@ -36,6 +39,8 @@ void ConfigurationForm::setData(const Configuration &config)
     blockTypeInput->setText(QString::fromStdString(config.type));
     blockNameInput->setText(QString::fromStdString(config.name));
     blockDateInput->setText(QString::fromStdString(config.date));
+    markerIds = config.markerIds;
+    relativePoints = config.relativePoints;
 }
 
 Configuration ConfigurationForm::getData()
@@ -45,12 +50,19 @@ Configuration ConfigurationForm::getData()
     config.name = blockNameInput->text().toStdString();
     config.type = blockTypeInput->text().toStdString();
     config.date = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
+    config.markerIds = markerIds;
+    config.relativePoints = relativePoints;
     return config;
 }
 
 void ConfigurationForm::onEditButton()
 {
-    emit editConfiguration(getData());
+    emit editConfiguration(getData(), true);
+}
+
+void ConfigurationForm::onDeleteButton()
+{
+    emit removeConfiguration(getData());
 }
 
 ConfigurationsWidget::ConfigurationsWidget(QWidget *parent)
@@ -82,6 +94,11 @@ void ConfigurationsWidget::setConfigurations(
                 &ConfigurationForm::editConfiguration,
                 this,
                 &ConfigurationsWidget::editConfiguration);
+            connect(
+                widget,
+                &ConfigurationForm::removeConfiguration,
+                this,
+                &ConfigurationsWidget::removeConfiguration);
             contentLayout->addWidget(widget);
             section->setContentLayout(*contentLayout);
             mainLayout->addWidget(section);

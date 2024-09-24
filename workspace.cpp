@@ -32,11 +32,12 @@ Workspace::~Workspace()
 
 void Workspace::init()
 {
+    ensureDirectoryIsClean(imagesDir);
+
     calibrationThread->setYamlHandler(yamlHandler);
     markerThread->setYamlHandler(yamlHandler);
 
     startThread(cameraThread);
-    ensureDirectoryIsClean(imagesDir);
 }
 
 std::map<std::string, Configuration> Workspace::getConfigurations()
@@ -61,16 +62,26 @@ void Workspace::onMarkerSizeChanged(int size)
     markerThread->setMarkerSize(size);
 }
 
-void Workspace::saveConfiguration(const Configuration &newConfiguration)
+void Workspace::saveConfiguration(const Configuration &newConfiguration, bool calledFromConfigWidget)
 {
-    // Получаю текущую конфигурацию потому из треда маркеров,
+    // Получаю текущую конфигурацию из треда маркеров,
     // потому что информация о маркерах и положении цента известна только там
-    Configuration currentConfiguration = markerThread->getCurrConfiguration();
-    currentConfiguration.id = newConfiguration.id;
-    currentConfiguration.type = newConfiguration.type;
-    currentConfiguration.name = newConfiguration.name;
-    currentConfiguration.date = newConfiguration.date;
-    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    if (!calledFromConfigWidget) {
+        Configuration currentConfiguration = markerThread->getCurrConfiguration();
+        currentConfiguration.id = newConfiguration.id;
+        currentConfiguration.type = newConfiguration.type;
+        currentConfiguration.name = newConfiguration.name;
+        currentConfiguration.date = newConfiguration.date;
+        yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    } else {
+        yamlHandler->updateConfigurations("configurations.yml", newConfiguration);
+    }
+    emit configurationsUpdated();
+}
+
+void Workspace::removeConfiguration(const Configuration &config)
+{
+    yamlHandler->removeConfiguration("configurations.yml", config);
     emit configurationsUpdated();
 }
 
@@ -105,6 +116,7 @@ void Workspace::stopThread(QThread *thread)
             return;
         }
 
+        // default
         thread->quit();
         thread->wait();
     }
@@ -132,6 +144,7 @@ void Workspace::onPageChanged(int page)
             emit taskFinished(false, tr("Не обнаружен файл калибровки. Сначала откалибруйте камеру!"));
             return;
         }
+
         stopThread(cameraThread);
         stopThread(calibrationThread);
         startThread(markerThread);

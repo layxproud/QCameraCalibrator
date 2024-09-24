@@ -36,6 +36,7 @@ public:
     bool saveConfigurations(
         const std::string &filename, const std::map<std::string, Configuration> &configurations);
     bool updateConfigurations(const std::string &filename, const Configuration &currentConfiguration);
+    bool removeConfiguration(const std::string &filename, const Configuration &configToRemove);
 
 signals:
     void taskFinished(bool success, const QString &message);

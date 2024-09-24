@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>978</width>
-    <height>618</height>
+    <width>785</width>
+    <height>556</height>
    </rect>
   </property>
   <property name="font">
@@ -39,8 +39,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>952</width>
-         <height>443</height>
+         <width>759</width>
+         <height>381</height>
         </rect>
        </property>
        <attribute name="label">
@@ -48,11 +48,83 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QPushButton" name="captureButton">
+         <layout class="QHBoxLayout" name="calibrationStatusLayout">
+          <item>
+           <widget class="QLabel" name="calibrationStatusLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Файл калибровки отсутствует</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="chooseCalibrationButton">
+            <property name="text">
+             <string>Выбрать файл калибровки...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="calibrateCameraLabel">
           <property name="text">
-           <string>СДЕЛАТЬ КАДР</string>
+           <string>Откалибровать камеру</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="calibrateCameraLayout">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="framesCapturedLayout">
+            <item>
+             <widget class="QLabel" name="framesCapturedLabel">
+              <property name="text">
+               <string>Сделано кадров:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="framesCapturedValue">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="captureButton">
+            <property name="text">
+             <string>СДЕЛАТЬ КАДР (Пробел)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QPushButton" name="calibrateButton">
@@ -68,8 +140,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>952</width>
-         <height>443</height>
+         <width>759</width>
+         <height>381</height>
         </rect>
        </property>
        <attribute name="label">
@@ -124,42 +196,42 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="5" column="0">
            <widget class="QLabel" name="blockTypeLabel">
             <property name="text">
              <string>Тип блока</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="5" column="1">
            <widget class="QLineEdit" name="blockTypeInput"/>
           </item>
-          <item row="4" column="0">
+          <item row="6" column="0">
            <widget class="QLabel" name="blockNameLabel">
             <property name="text">
              <string>Название блока</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="6" column="1">
            <widget class="QLineEdit" name="blockNameInput"/>
           </item>
-          <item row="5" column="0">
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="blockIdInput">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
            <widget class="QLabel" name="blockDateLabel">
             <property name="text">
              <string>Дата создания блока</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="3" column="1">
            <widget class="QLineEdit" name="blockDateInput">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="blockIdInput">
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -194,8 +266,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>952</width>
-         <height>443</height>
+         <width>759</width>
+         <height>381</height>
         </rect>
        </property>
        <attribute name="label">
@@ -216,7 +288,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>978</width>
+     <width>785</width>
      <height>26</height>
     </rect>
    </property>
