@@ -7,7 +7,7 @@ CalibrationThread::CalibrationThread(QObject *parent)
     , running(false)
 {
     int squaresX = 7, squaresY = 5;
-    float squareLength = 0.04f, markerLength = 0.02f;
+    float squareLength = 40.0f, markerLength = 20.0f;
     dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
     detectorParams = cv::aruco::DetectorParameters();
     detector = cv::aruco::ArucoDetector(dictionary, detectorParams);
@@ -51,6 +51,8 @@ void CalibrationThread::run()
         cv::Mat frame = cv::imread(filePath.toStdString());
         if (!frame.empty()) {
             frames.push_back(frame);
+        } else {
+            qWarning() << "Не удалось открыть изображение: " << fileName;
         }
     }
 

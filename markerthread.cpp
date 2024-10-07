@@ -29,8 +29,8 @@ void MarkerThread::run()
     cv::Mat resizedImage;
     cv::Size newSize(640, 480);
 
-    // cap.open(0);
-    cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
+    cap.open(0);
+    // cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
 
     if (!cap.isOpened())
         return;
@@ -81,8 +81,14 @@ void MarkerThread::run()
 
                 updateSelectedPointPosition();
 
+                // Перевод точки из пространства на плоскость
                 if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)
                     && !currentConfiguration.name.empty()) {
+                    //                    qDebug() << "Marker 0: " << markerPoints.at(0).second.z;
+                    //                    qDebug() << "Marker 1: " << markerPoints.at(1).second.z;
+                    qDebug() << "X: " << selectedPoint.x;
+                    qDebug() << "Y: " << selectedPoint.y;
+                    qDebug() << "Distance: " << selectedPoint.z;
                     std::vector<cv::Point3f> points3D = {selectedPoint};
                     std::vector<cv::Point2f> points2D;
                     cv::projectPoints(
@@ -193,7 +199,8 @@ cv::Point3f MarkerThread::projectPointTo3D(const cv::Point2f &point2D, float dep
               / calibrationParams.cameraMatrix.at<double>(0, 0);
     float y = (point2D.y - calibrationParams.cameraMatrix.at<double>(1, 2))
               / calibrationParams.cameraMatrix.at<double>(1, 1);
-    return cv::Point3f(x * depth, y * depth, depth);
+    // return cv::Point3f(x * depth, y * depth, depth);
+    return cv::Point3f(x, y, depth);
 }
 
 cv::Point3f MarkerThread::calculateRelativePosition(
@@ -243,8 +250,7 @@ void MarkerThread::updateSelectedPointPosition()
     }
 
     if (!allPoints.empty()) {
-        cv::Point3f medianPoint = calculateMedianPoint(allPoints);
-        selectedPoint = medianPoint;
+        selectedPoint = calculateMedianPoint(allPoints);
     }
 }
 

@@ -27,7 +27,7 @@ protected:
 
 public slots:
     void onPointSelected(const QPointF &point);
-    void setMarkerSize(int size) { markerSize = (float) size / 100.0; }
+    void setMarkerSize(int size) { markerSize = (float) size; }
     void updateConfigurationsMap();
 
 private:
@@ -37,7 +37,7 @@ private:
     QMutex mutex;
     YamlHandler *yamlHandler;
 
-    float markerSize = 0.31f;
+    float markerSize = 31.0f;
     cv::aruco::Dictionary AruCoDict;
     cv::aruco::DetectorParameters detectorParams;
     cv::aruco::ArucoDetector detector;
