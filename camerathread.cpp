@@ -55,5 +55,4 @@ void CameraThread::saveCurrentFrame(const QString &directory, int frameNumber)
 
     QString filePath = directory + QString("/frame_%1.png").arg(frameNumber, 3, 10, QChar('0'));
     cv::imwrite(filePath.toStdString(), resizedFrame);
-    qDebug() << "Frame captured and saved to" << filePath;
 }

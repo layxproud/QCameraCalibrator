@@ -61,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
         &MainWindow::onCalibrationParametersMissing);
     connect(workspace, &Workspace::newConfiguration, this, &MainWindow::onNewConfiguration);
     connect(workspace, &Workspace::configurationsUpdated, this, &MainWindow::onCofigurationsUpdated);
+    connect(workspace, &Workspace::calibrationUpdated, this, &MainWindow::onCalibrationUpdated);
+    connect(workspace, &Workspace::frameCaptured, this, &MainWindow::onFrameCaptured);
 
     workspace->init();
     configurationsWidget->setConfigurations(workspace->getConfigurations());
@@ -125,4 +127,18 @@ void MainWindow::onSaveConfiguration()
 void MainWindow::onCofigurationsUpdated()
 {
     configurationsWidget->setConfigurations(workspace->getConfigurations());
+}
+
+void MainWindow::onCalibrationUpdated(bool status)
+{
+    if (status) {
+        ui->calibrationStatusLabel->setText(tr("Файл калибровки загружен"));
+    } else {
+        ui->calibrationStatusLabel->setText(tr("Файл калибровки отсутствует"));
+    }
+}
+
+void MainWindow::onFrameCaptured(int num)
+{
+    ui->framesCapturedValue->setText(QString::number(num));
 }

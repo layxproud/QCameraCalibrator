@@ -26,6 +26,8 @@ signals:
     void taskFinished(bool success, const QString &message);
     void calibrationParamsMissing();
     void configurationsUpdated();
+    void calibrationUpdated(bool status);
+    void frameCaptured(int num);
 
 public slots:
     void onPageChanged(int page);
@@ -43,6 +45,9 @@ private:
 
     int frameNumber;
     QString imagesDir;
+
+    CalibrationParams calibrationParams;
+    bool calibrationStatus;
 
     void startThread(QThread *thread);
     void stopThread(QThread *thread);

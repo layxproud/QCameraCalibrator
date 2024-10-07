@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QGraphicsPixmapItem>
 
 class GraphicsViewContainer : public QWidget
 {
@@ -23,6 +24,7 @@ private:
     QGraphicsScene *scene;
     QGraphicsView *view;
     QVBoxLayout *layout;
+    QGraphicsPixmapItem *pixmapItem;
 };
 
 #endif // GRAPHICSVIEWCONTAINER_H

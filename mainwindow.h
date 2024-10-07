@@ -41,6 +41,8 @@ private slots:
     void onCalibrationParametersMissing();
     void onSaveConfiguration();
     void onCofigurationsUpdated();
+    void onCalibrationUpdated(bool status);
+    void onFrameCaptured(int num);
 };
 
 #endif // MAINWINDOW_H

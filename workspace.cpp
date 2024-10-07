@@ -8,6 +8,7 @@ Workspace::Workspace(QObject *parent)
     , calibrationThread(new CalibrationThread(this))
     , markerThread(new MarkerThread(this))
     , frameNumber(0)
+    , calibrationStatus(false)
     , imagesDir(QDir::currentPath() + "/images")
 {
     connect(cameraThread, &CameraThread::frameReady, this, &Workspace::frameReady);
@@ -32,8 +33,12 @@ Workspace::~Workspace()
 
 void Workspace::init()
 {
+    // Инициализация калибровки
     ensureDirectoryIsClean(imagesDir);
+    calibrationStatus = yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
+    emit calibrationUpdated(calibrationStatus);
 
+    // Инициализация потоков
     calibrationThread->setYamlHandler(yamlHandler);
     markerThread->setYamlHandler(yamlHandler);
 
@@ -50,6 +55,7 @@ std::map<std::string, Configuration> Workspace::getConfigurations()
 void Workspace::onCaptureFrame()
 {
     cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
+    emit frameCaptured(frameNumber);
 }
 
 void Workspace::onStartCalibration()
