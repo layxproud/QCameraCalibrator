@@ -46,7 +46,6 @@ void MarkerThread::run()
         {
             QMutexLocker locker(&mutex);
             currentFrame = frame.clone();
-            // resizedImage = currentFrame.clone(); // Для теста ресайза
             cv::resize(currentFrame, resizedImage, newSize);
 
             markerIds.clear();
