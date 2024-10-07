@@ -97,7 +97,10 @@ void MarkerThread::run()
                     cv::circle(resizedImage, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
 
                     std::stringstream ss;
-                    ss << "DISTANCE: " << selectedPoint.z << " mm";
+                    double distance = std::sqrt(
+                        selectedPoint.x * selectedPoint.x + selectedPoint.y * selectedPoint.y
+                        + selectedPoint.z * selectedPoint.z);
+                    ss << "DISTANCE: " << distance << " mm";
                     cv::putText(
                         resizedImage,
                         ss.str(),
@@ -197,37 +200,33 @@ cv::Vec4f MarkerThread::calculateMarkersPlane(const std::vector<cv::Point3f> &ma
 
 float MarkerThread::getDepthAtPoint(const cv::Point2f &point)
 {
-    // Convert the 2D point to a normalized ray direction in the camera space
     cv::Mat K = calibrationParams.cameraMatrix;
     float x = (point.x - K.at<double>(0, 2)) / K.at<double>(0, 0);
     float y = (point.y - K.at<double>(1, 2)) / K.at<double>(1, 1);
-    cv::Point3f rayDir(x, y, 1.0f); // Ray direction (normalized)
+    cv::Point3f rayDir(x, y, 1.0f);
 
-    // Find the closest marker using Euclidean distance from tvecs
-    float minDistance = std::numeric_limits<float>::max();
+    std::vector<cv::Point3f> marker3DPoints;
     for (const auto &marker : markerPoints) {
-        // Calculate Euclidean distance for each marker
-        const cv::Vec3f &tvec = marker.second; // tvec is the translation vector of the marker
-        float distance = std::sqrt(tvec[0] * tvec[0] + tvec[1] * tvec[1] + tvec[2] * tvec[2]);
-
-        if (distance < minDistance) {
-            minDistance = distance;
-        }
+        marker3DPoints.push_back(marker.second);
     }
 
-    // Use the minimum distance as the depth to project the point into 3D
-    return minDistance;
+    cv::Vec4f plane = calculateMarkersPlane(marker3DPoints);
+
+    float numerator = -(plane[0] * 0 + plane[1] * 0 + plane[2] * 0 + plane[3]);
+    float denominator = plane[0] * rayDir.x + plane[1] * rayDir.y + plane[2] * rayDir.z;
+
+    float t = numerator / denominator;
+
+    return t;
 }
 
 cv::Point3f MarkerThread::projectPointTo3D(const cv::Point2f &point2D, float depth)
 {
-    // Convert 2D point to normalized coordinates and scale by depth
     float x = (point2D.x - calibrationParams.cameraMatrix.at<double>(0, 2))
               / calibrationParams.cameraMatrix.at<double>(0, 0);
     float y = (point2D.y - calibrationParams.cameraMatrix.at<double>(1, 2))
               / calibrationParams.cameraMatrix.at<double>(1, 1);
 
-    // Return the 3D point in the camera space
     return cv::Point3f(x * depth, y * depth, depth);
 }
 
