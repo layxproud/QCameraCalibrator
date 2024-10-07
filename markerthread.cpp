@@ -72,11 +72,8 @@ void MarkerThread::run()
                         rvecs.at(i),
                         tvecs.at(i));
 
-                    cv::Point2f markerCenter = (markerCorners.at(i)[0] + markerCorners.at(i)[1]
-                                                + markerCorners.at(i)[2] + markerCorners.at(i)[3])
-                                               * 0.25;
-                    markerPoints.emplace_back(
-                        markerCenter, cv::Point3f(tvecs[i][0], tvecs[i][1], tvecs[i][2]));
+                    markerPoints.push_back(
+                        std::make_pair(markerCorners[i][0], cv::Point3f(tvecs[i])));
                 }
 
                 updateSelectedPointPosition();
@@ -84,8 +81,6 @@ void MarkerThread::run()
                 // Перевод точки из пространства на плоскость
                 if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)
                     && !currentConfiguration.name.empty()) {
-                    //                    qDebug() << "Marker 0: " << markerPoints.at(0).second.z;
-                    //                    qDebug() << "Marker 1: " << markerPoints.at(1).second.z;
                     qDebug() << "X: " << selectedPoint.x;
                     qDebug() << "Y: " << selectedPoint.y;
                     qDebug() << "Distance: " << selectedPoint.z;
@@ -100,6 +95,17 @@ void MarkerThread::run()
                         points2D);
 
                     cv::circle(resizedImage, points2D[0], 5, cv::Scalar(0, 0, 255), -1);
+
+                    std::stringstream ss;
+                    ss << "DISTANCE: " << selectedPoint.z << " mm";
+                    cv::putText(
+                        resizedImage,
+                        ss.str(),
+                        cv::Point(50, 50),
+                        cv::FONT_HERSHEY_SIMPLEX,
+                        1,
+                        cv::Scalar(0, 255, 0),
+                        2);
                 }
             } else {
                 detectCurrentConfiguration();
@@ -178,19 +184,37 @@ void MarkerThread::detectCurrentConfiguration()
     }
 }
 
+cv::Vec4f MarkerThread::calculateMarkersPlane(const std::vector<cv::Point3f> &marker3DPoints)
+{
+    cv::Point3f v1 = marker3DPoints[1] - marker3DPoints[0];
+    cv::Point3f v2 = marker3DPoints[2] - marker3DPoints[0];
+
+    cv::Point3f normal = v1.cross(v2);
+    float D = -(normal.dot(marker3DPoints[0]));
+
+    return cv::Vec4f(normal.x, normal.y, normal.z, D);
+}
+
 float MarkerThread::getDepthAtPoint(const cv::Point2f &point)
 {
-    float minDist = std::numeric_limits<float>::max();
-    float depth = 0.0f;
+    cv::Mat K = calibrationParams.cameraMatrix;
+    float x = (point.x - K.at<double>(0, 2)) / K.at<double>(0, 0);
+    float y = (point.y - K.at<double>(1, 2)) / K.at<double>(1, 1);
+    cv::Point3f rayDir(x, y, 1.0f);
 
+    std::vector<cv::Point3f> marker3DPoints;
     for (const auto &marker : markerPoints) {
-        float dist = cv::norm(point - marker.first);
-        if (dist < minDist) {
-            minDist = dist;
-            depth = marker.second.z;
-        }
+        marker3DPoints.push_back(marker.second);
     }
-    return depth;
+
+    cv::Vec4f plane = calculateMarkersPlane(marker3DPoints);
+
+    float numerator = -(plane[0] * 0 + plane[1] * 0 + plane[2] * 0 + plane[3]);
+    float denominator = plane[0] * rayDir.x + plane[1] * rayDir.y + plane[2] * rayDir.z;
+
+    float t = numerator / denominator;
+
+    return t;
 }
 
 cv::Point3f MarkerThread::projectPointTo3D(const cv::Point2f &point2D, float depth)
@@ -199,8 +223,8 @@ cv::Point3f MarkerThread::projectPointTo3D(const cv::Point2f &point2D, float dep
               / calibrationParams.cameraMatrix.at<double>(0, 0);
     float y = (point2D.y - calibrationParams.cameraMatrix.at<double>(1, 2))
               / calibrationParams.cameraMatrix.at<double>(1, 1);
-    // return cv::Point3f(x * depth, y * depth, depth);
-    return cv::Point3f(x, y, depth);
+
+    return cv::Point3f(x * depth, y * depth, depth);
 }
 
 cv::Point3f MarkerThread::calculateRelativePosition(
@@ -229,6 +253,7 @@ void MarkerThread::updateSelectedPointPosition()
     }
     const auto &config = currentConfiguration;
     std::vector<cv::Point3f> allPoints;
+    std::vector<float> reprojectionErrors;
 
     for (int id : config.markerIds) {
         auto it = std::find(markerIds.begin(), markerIds.end(), id);
@@ -244,23 +269,30 @@ void MarkerThread::updateSelectedPointPosition()
                    config.relativePoints.at(id).z);
             cv::Mat newPointMat = rotationMatrix * relativePointMat + cv::Mat(tvecs.at(index));
 
+            float error = cv::norm(relativePointMat - newPointMat);
+
             allPoints.push_back(cv::Point3f(
                 newPointMat.at<double>(0), newPointMat.at<double>(1), newPointMat.at<double>(2)));
+            reprojectionErrors.push_back(error);
         }
     }
 
     if (!allPoints.empty()) {
-        selectedPoint = calculateMedianPoint(allPoints);
+        selectedPoint = calculateWeightedAveragePoint(allPoints, reprojectionErrors);
     }
 }
 
-cv::Point3f MarkerThread::calculateMedianPoint(const std::vector<cv::Point3f> &points)
+cv::Point3f MarkerThread::calculateWeightedAveragePoint(
+    const std::vector<cv::Point3f> &points, const std::vector<float> &errors)
 {
-    std::vector<cv::Point3f> sortedPoints = points;
-    std::sort(sortedPoints.begin(), sortedPoints.end(), [](const cv::Point3f &a, const cv::Point3f &b) {
-        return a.x < b.x;
-    });
+    cv::Point3f weightedSum(0, 0, 0);
+    float totalWeight = 0.0f;
 
-    size_t medianIndex = points.size() / 2;
-    return sortedPoints[medianIndex];
+    for (size_t i = 0; i < points.size(); i++) {
+        float weight = 1.0f / (errors[i] + 1e-5);
+        weightedSum += points[i] * weight;
+        totalWeight += weight;
+    }
+
+    return weightedSum / totalWeight;
 }

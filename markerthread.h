@@ -56,12 +56,15 @@ private:
 
     void detectCurrentConfiguration();
 
+    cv::Vec4f calculateMarkersPlane(const std::vector<cv::Point3f> &marker3DPoints);
     float getDepthAtPoint(const cv::Point2f &point);
     cv::Point3f projectPointTo3D(const cv::Point2f &point2D, float depth);
     cv::Point3f calculateRelativePosition(
         const cv::Point3f &point3D, const cv::Vec3d &rvec, const cv::Vec3d &tvec);
+
     void updateSelectedPointPosition();
-    cv::Point3f calculateMedianPoint(const std::vector<cv::Point3f> &points);
+    cv::Point3f calculateWeightedAveragePoint(
+        const std::vector<cv::Point3f> &points, const std::vector<float> &errors);
 };
 
 #endif // MARKERTHREAD_H
