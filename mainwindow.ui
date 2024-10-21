@@ -32,7 +32,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="calibrationPage">
        <property name="geometry">
@@ -145,7 +145,7 @@
         </rect>
        </property>
        <attribute name="label">
-        <string>Калибровка маркеров</string>
+        <string>Создание блоков маркеров</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -240,11 +240,25 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="saveConfigButton">
-          <property name="text">
-           <string>Сохранить</string>
+         <layout class="QHBoxLayout" name="saveButtonsLayout">
+          <property name="topMargin">
+           <number>0</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QPushButton" name="saveToConfigurationsButton">
+            <property name="text">
+             <string>Сохранить в общий файл</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveSingleConfigButton">
+            <property name="text">
+             <string>Сохранить отдельно</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer">
@@ -271,7 +285,7 @@
         </rect>
        </property>
        <attribute name="label">
-        <string>Редактор конфигураций</string>
+        <string>Список блоков маркеров</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>

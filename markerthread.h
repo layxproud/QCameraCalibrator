@@ -12,6 +12,7 @@ class MarkerThread : public QThread
     Q_OBJECT
 public:
     explicit MarkerThread(QObject *parent = nullptr);
+
     void setYamlHandler(YamlHandler *handler) { yamlHandler = handler; }
     void setCalibrationParams(const CalibrationParams &params) { calibrationParams = params; }
     Configuration getCurrConfiguration() { return currentConfiguration; }

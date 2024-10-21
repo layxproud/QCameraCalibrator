@@ -24,7 +24,8 @@ public:
 
 signals:
     void pointSelected(const QPointF &point);
-    void saveConfiguration(const Configuration &config, bool calledFromConfigWidget);
+    void saveConfiguration(
+        const Configuration &config, bool calledFromConfigWidget, bool saveSingleConfiguration);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -35,11 +36,14 @@ private:
     GraphicsViewContainer *graphicsViewContainer;
     ConfigurationsWidget *configurationsWidget;
 
+    Configuration formConfiguration();
+
 private slots:
     void onTaskFinished(bool success, const QString &message);
     void onNewConfiguration(const Configuration &config);
     void onCalibrationParametersMissing();
     void onSaveConfiguration();
+    void onSaveSingleConfiguration();
     void onCofigurationsUpdated();
     void onCalibrationUpdated(bool status);
     void onFrameCaptured(int num);

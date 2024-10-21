@@ -43,16 +43,16 @@ void CameraThread::run()
     cap.release();
 }
 
-void CameraThread::saveCurrentFrame(const QString &directory, int frameNumber)
+bool CameraThread::saveCurrentFrame(const QString &directory, int frameNumber)
 {
     QMutexLocker locker(&mutex);
     if (currentFrame.empty())
-        return;
+        return false;
 
     cv::Mat resizedFrame;
     cv::Size newSize(640, 480);
     cv::resize(currentFrame, resizedFrame, newSize);
 
     QString filePath = directory + QString("/frame_%1.png").arg(frameNumber, 3, 10, QChar('0'));
-    cv::imwrite(filePath.toStdString(), resizedFrame);
+    return cv::imwrite(filePath.toStdString(), resizedFrame);
 }

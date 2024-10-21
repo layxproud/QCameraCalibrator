@@ -8,8 +8,8 @@ Workspace::Workspace(QObject *parent)
     , calibrationThread(new CalibrationThread(this))
     , markerThread(new MarkerThread(this))
     , frameNumber(0)
-    , calibrationStatus(false)
     , imagesDir(QDir::currentPath() + "/images")
+    , calibrationStatus(false)
 {
     connect(cameraThread, &CameraThread::frameReady, this, &Workspace::frameReady);
     connect(markerThread, &MarkerThread::frameReady, this, &Workspace::frameReady);
@@ -54,8 +54,12 @@ std::map<std::string, Configuration> Workspace::getConfigurations()
 
 void Workspace::onCaptureFrame()
 {
-    cameraThread->saveCurrentFrame(imagesDir, frameNumber++);
-    emit frameCaptured(frameNumber);
+    if (cameraThread->saveCurrentFrame(imagesDir, frameNumber++)) {
+        emit frameCaptured(frameNumber);
+    } else {
+        frameNumber--;
+        emit taskFinished(false, tr("Не удалось сделать снимок"));
+    }
 }
 
 void Workspace::onStartCalibration()
@@ -68,7 +72,7 @@ void Workspace::onMarkerSizeChanged(int size)
     markerThread->setMarkerSize(size);
 }
 
-void Workspace::saveConfiguration(const Configuration &newConfiguration, bool calledFromConfigWidget)
+void Workspace::saveConfiguration(const Configuration &newConfiguration, bool calledFromConfigWidget, bool saveSingleConfiguration)
 {
     // Получаю текущую конфигурацию из треда маркеров,
     // потому что информация о маркерах и положении цента известна только там

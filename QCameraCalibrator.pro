@@ -36,23 +36,13 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-# Specify the OpenCV version you are using
-OPENCV_VERSION = 490
+# OPENCV
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/third_party/opencv_mingw810/x64/mingw/lib/ -llibopencv_world4100
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/third_party/opencv_mingw810/x64/mingw/lib/ -llibopencv_world4100d
+else:unix: LIBS += -L$$PWD/third_party/opencv_mingw810/x64/mingw/lib/ -llibopencv_world4100.dll
 
-# Specify the path to the OpenCV include directory
-INCLUDEPATH += C:/lib/install/opencv/include
-
-# Specify the path to the OpenCV library directory
-LIBS += -LC:/lib/install/opencv/x64/vc17/lib
-
-# Link the correct version of the opencv_world library depending on the build configuration
-CONFIG(debug, debug|release) {
-    # Debug configuration
-    LIBS += -lopencv_world$$OPENCV_VERSION"d"
-} else {
-    # Release configuration
-    LIBS += -lopencv_world$$OPENCV_VERSION
-}
+INCLUDEPATH += $$PWD/third_party/opencv_mingw810/include
+DEPENDPATH += $$PWD/third_party/opencv_mingw810/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

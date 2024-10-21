@@ -11,7 +11,7 @@ class CameraThread : public QThread
 public:
     explicit CameraThread(QObject *parent = nullptr);
     void stop();
-    void saveCurrentFrame(const QString &directory, int frameNumber);
+    bool saveCurrentFrame(const QString &directory, int frameNumber);
 
 signals:
     void frameReady(const cv::Mat &frame);

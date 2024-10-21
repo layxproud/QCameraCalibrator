@@ -33,7 +33,16 @@ MainWindow::MainWindow(QWidget *parent)
         QOverload<int>::of(&QSpinBox::valueChanged),
         workspace,
         &Workspace::onMarkerSizeChanged);
-    connect(ui->saveConfigButton, &QPushButton::clicked, this, &MainWindow::onSaveConfiguration);
+    connect(
+        ui->saveToConfigurationsButton,
+        &QPushButton::clicked,
+        this,
+        &MainWindow::onSaveConfiguration);
+    connect(
+        ui->saveSingleConfigButton,
+        &QPushButton::clicked,
+        this,
+        &MainWindow::onSaveSingleConfiguration);
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(this, &MainWindow::saveConfiguration, workspace, &Workspace::saveConfiguration);
     connect(
@@ -85,6 +94,23 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     QMainWindow::mousePressEvent(event);
 }
 
+Configuration MainWindow::formConfiguration()
+{
+    Configuration newConfiguration{};
+    newConfiguration.name = ui->blockNameInput->text().toStdString();
+    newConfiguration.type = ui->blockTypeInput->text().toStdString();
+    newConfiguration.date
+        = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
+    if (ui->blockIdInput->text() == "") {
+        QUuid uuid = QUuid::createUuid();
+        QString uuidString = uuid.toString(QUuid::WithoutBraces);
+        newConfiguration.id = uuidString.toStdString();
+    } else {
+        newConfiguration.id = ui->blockIdInput->text().toStdString();
+    }
+    return newConfiguration;
+}
+
 void MainWindow::onTaskFinished(bool success, const QString &message)
 {
     if (success) {
@@ -99,7 +125,7 @@ void MainWindow::onNewConfiguration(const Configuration &config)
     ui->blockIdInput->setText(QString::fromStdString(config.id));
     ui->blockDateInput->setText(QString::fromStdString(config.date));
     ui->blockNameInput->setText(QString::fromStdString(config.name));
-    ui->blockTypeInput->setText(QString::fromStdString(config.type));  
+    ui->blockTypeInput->setText(QString::fromStdString(config.type));
 }
 
 void MainWindow::onCalibrationParametersMissing()
@@ -109,19 +135,14 @@ void MainWindow::onCalibrationParametersMissing()
 
 void MainWindow::onSaveConfiguration()
 {
-    Configuration newConfiguration{};
-    newConfiguration.name = ui->blockNameInput->text().toStdString();
-    newConfiguration.type = ui->blockTypeInput->text().toStdString();
-    newConfiguration.date
-        = QString(QDateTime::currentDateTime().toString("dd-MM-yyyy")).toStdString();
-    if (ui->blockIdInput->text() == "") {
-        QUuid uuid = QUuid::createUuid();
-        QString uuidString = uuid.toString(QUuid::WithoutBraces);
-        newConfiguration.id = uuidString.toStdString();
-    } else {
-        newConfiguration.id = ui->blockIdInput->text().toStdString();
-    }
-    emit saveConfiguration(newConfiguration, false);
+    Configuration newConfiguration = formConfiguration();
+    emit saveConfiguration(newConfiguration, false, false);
+}
+
+void MainWindow::onSaveSingleConfiguration()
+{
+    Configuration newConfiguration = formConfiguration();
+    emit saveConfiguration(newConfiguration, false, true);
 }
 
 void MainWindow::onCofigurationsUpdated()

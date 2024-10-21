@@ -1,5 +1,6 @@
 #include "markerthread.h"
 #include <QDebug>
+#include <QPointF>
 
 MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
