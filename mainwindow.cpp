@@ -21,9 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editorLayout->addWidget(configurationsWidget);
     ui->toolBox->setCurrentIndex(0);
 
+    // Shortcuts
     QShortcut *captuteFrameShortcut = new QShortcut(Qt::Key_Space, ui->captureButton);
 
-    // Connects from GUI
+    // Connects from MainWindow
     connect(ui->captureButton, &QPushButton::clicked, workspace, &Workspace::onCaptureFrame);
     QObject::connect(
         captuteFrameShortcut, &QShortcut::activated, workspace, &Workspace::onCaptureFrame);
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(
         this, &MainWindow::saveSingleConfiguration, workspace, &Workspace::saveSingleConfiguration);
     connect(this, &MainWindow::exportConfiguration, workspace, &Workspace::exportConfiguration);
+    connect(this, &MainWindow::selectCalibrationFile, workspace, &Workspace::selectCalibrationFile);
     connect(
         configurationsWidget,
         &ConfigurationsWidget::editConfiguration,
@@ -60,8 +62,13 @@ MainWindow::MainWindow(QWidget *parent)
         &ConfigurationsWidget::removeConfiguration,
         workspace,
         &Workspace::removeConfiguration);
+    connect(
+        ui->selectCalibrationFileButton,
+        &QPushButton::clicked,
+        this,
+        &MainWindow::onSelectCalibrationFileButton);
 
-    // Connects to GUI
+    // Connects to MainWindow
     connect(
         workspace,
         &Workspace::frameReady,
@@ -78,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(workspace, &Workspace::calibrationUpdated, this, &MainWindow::onCalibrationUpdated);
     connect(workspace, &Workspace::frameCaptured, this, &MainWindow::onFrameCaptured);
 
+    // Other tasks
     workspace->init();
     configurationsWidget->setConfigurations(workspace->getConfigurations());
 }
@@ -121,9 +129,9 @@ Configuration MainWindow::formConfiguration()
 void MainWindow::onTaskFinished(bool success, const QString &message)
 {
     if (success) {
-        QMessageBox::information(this, tr("Успех"), message);
+        QMessageBox::information(this, tr("Success"), message);
     } else {
-        QMessageBox::warning(this, tr("Ошибка"), message);
+        QMessageBox::warning(this, tr("Error"), message);
     }
 }
 
@@ -149,8 +157,8 @@ void MainWindow::onSaveConfiguration()
 void MainWindow::onSaveSingleConfiguration()
 {
     Configuration newConfiguration = formConfiguration();
-    QString fileName = QFileDialog::getSaveFileName(
-        this, tr("Сохранение блока"), QString(), tr("YAML files (*.yml)"));
+    QString fileName
+        = QFileDialog::getSaveFileName(this, tr("Saving block"), QString(), tr("YAML files (*.yml)"));
     emit saveSingleConfiguration(newConfiguration, fileName);
 }
 
@@ -162,9 +170,9 @@ void MainWindow::onCofigurationsUpdated()
 void MainWindow::onCalibrationUpdated(bool status)
 {
     if (status) {
-        ui->calibrationStatusLabel->setText(tr("Файл калибровки загружен"));
+        ui->calibrationStatusLabel->setText(tr("Calibration file loaded"));
     } else {
-        ui->calibrationStatusLabel->setText(tr("Файл калибровки отсутствует"));
+        ui->calibrationStatusLabel->setText(tr("Calibration file missing"));
     }
 }
 
@@ -176,6 +184,13 @@ void MainWindow::onFrameCaptured(int num)
 void MainWindow::onExportConfiguration()
 {
     QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Экспорт блока"), QString(), tr("YAML files (*.yml)"));
+        this, tr("Exporting block"), QString(), tr("YAML files (*.yml)"));
     emit exportConfiguration(fileName);
+}
+
+void MainWindow::onSelectCalibrationFileButton()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Select calibration file"), QString(), tr("YAML files (*.yml)"));
+    emit selectCalibrationFile(fileName);
 }

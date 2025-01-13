@@ -39,6 +39,7 @@ public slots:
     void editConfiguration(const Configuration &newConfiguration);
     void removeConfiguration(const Configuration &config);
     void exportConfiguration(const QString &fileName);
+    void selectCalibrationFile(const QString &fileName);
 
 private:
     YamlHandler *yamlHandler;
@@ -51,6 +52,7 @@ private:
 
     CalibrationParams calibrationParams;
     bool calibrationStatus;
+    std::string calibrationFileName;
 
     void startThread(QThread *thread);
     void stopThread(QThread *thread);

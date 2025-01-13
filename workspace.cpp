@@ -34,12 +34,14 @@ Workspace::~Workspace()
 
 void Workspace::init()
 {
-    // Инициализация калибровки
+    // Load calibration params
+    calibrationFileName = "calibration.yml";
     ensureDirectoryIsClean(imagesDir);
-    calibrationStatus = yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams);
+    calibrationStatus
+        = yamlHandler->loadCalibrationParameters(calibrationFileName, calibrationParams);
     emit calibrationUpdated(calibrationStatus);
 
-    // Инициализация потоков
+    // Initialize threads
     calibrationThread->setYamlHandler(yamlHandler);
     markerThread->setYamlHandler(yamlHandler);
 
@@ -125,6 +127,18 @@ void Workspace::exportConfiguration(const QString &fileName)
     emit configurationsUpdated();
 }
 
+void Workspace::selectCalibrationFile(const QString &fileName)
+{
+    if (yamlHandler->loadCalibrationParameters(fileName.toStdString(), calibrationParams)) {
+        emit calibrationUpdated(true);
+        calibrationFileName = fileName.toStdString();
+    } else {
+        emit calibrationUpdated(false);
+        emit taskFinished(
+            false, QString(tr("Could not load calibration params from file: %1").arg(fileName)));
+    }
+}
+
 void Workspace::startThread(QThread *thread)
 {
     if (thread && !thread->isRunning()) {
@@ -179,7 +193,7 @@ void Workspace::onPageChanged(int page)
         startThread(cameraThread);
     } else {
         CalibrationParams calibrationParams;
-        if (!yamlHandler->loadCalibrationParameters("calibration.yml", calibrationParams)) {
+        if (!yamlHandler->loadCalibrationParameters(calibrationFileName, calibrationParams)) {
             emit calibrationParamsMissing();
             emit taskFinished(false, tr("Не обнаружен файл калибровки. Сначала откалибруйте камеру!"));
             return;

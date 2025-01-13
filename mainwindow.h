@@ -27,6 +27,7 @@ signals:
     void saveConfiguration(const Configuration &config);
     void saveSingleConfiguration(const Configuration &config, const QString &fileName);
     void exportConfiguration(const QString &fileName);
+    void selectCalibrationFile(const QString &fileName);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -49,6 +50,7 @@ private slots:
     void onCalibrationUpdated(bool status);
     void onFrameCaptured(int num);
     void onExportConfiguration();
+    void onSelectCalibrationFileButton();
 };
 
 #endif // MAINWINDOW_H
