@@ -5,10 +5,10 @@
 ConfigurationForm::ConfigurationForm(QWidget *parent)
     : QWidget(parent)
 {
-    blockIdLabel = new QLabel(tr("ID блока"), this);
-    blockNameLabel = new QLabel(tr("Имя блока"), this);
-    blockTypeLabel = new QLabel(tr("Тип блока"), this);
-    blockDateLabel = new QLabel(tr("Дата создания"), this);
+    blockIdLabel = new QLabel(tr("Block ID"), this);
+    blockNameLabel = new QLabel(tr("Block name"), this);
+    blockTypeLabel = new QLabel(tr("Block type"), this);
+    blockDateLabel = new QLabel(tr("Date of creation"), this);
     emptyLabel = new QLabel(this);
 
     blockIdInput = new QLineEdit(this);
@@ -18,9 +18,9 @@ ConfigurationForm::ConfigurationForm(QWidget *parent)
     blockDateInput = new QLineEdit(this);
     blockDateInput->setReadOnly(true);
 
-    editButton = new QPushButton(tr("Редактировать"), this);
+    editButton = new QPushButton(tr("Edit"), this);
     connect(editButton, &QPushButton::clicked, this, &ConfigurationForm::onEditButton);
-    deleteButton = new QPushButton(tr("Удалить"), this);
+    deleteButton = new QPushButton(tr("Delete"), this);
     connect(deleteButton, &QPushButton::clicked, this, &ConfigurationForm::onDeleteButton);
 
     formLayout = new QFormLayout(this);
@@ -81,7 +81,7 @@ void ConfigurationsWidget::setConfigurations(
     }
 
     if (configurations.empty()) {
-        QLabel *messageLabel = new QLabel(tr("Файл конфигураций не обнаружен или файл пуст"));
+        QLabel *messageLabel = new QLabel(tr("Configuration file is empty or missing"));
         mainLayout->addWidget(messageLabel);
     } else {
         for (const auto &pair : configurations) {

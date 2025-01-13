@@ -143,6 +143,7 @@ void MainWindow::onNewConfiguration(const Configuration &config)
     ui->blockTypeInput->setText(QString::fromStdString(config.type));
 }
 
+// Returns user to first page, if there are troubles with calibration params
 void MainWindow::onCalibrationParametersMissing()
 {
     ui->toolBox->setCurrentIndex(0);

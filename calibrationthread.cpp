@@ -36,8 +36,7 @@ void CalibrationThread::run()
     QStringList fileNames = dir.entryList();
 
     if (fileNames.isEmpty()) {
-        emit taskFinished(
-            false, QString(tr("В директории %1 не обнаружены изображения")).arg(imagesDir));
+        emit taskFinished(false, QString(tr("No images in directory %1")).arg(imagesDir));
         return;
     }
 
@@ -53,12 +52,12 @@ void CalibrationThread::run()
         if (!frame.empty()) {
             frames.push_back(frame);
         } else {
-            qWarning() << "Не удалось открыть изображение: " << fileName;
+            qWarning() << "Could not load image: " << fileName;
         }
     }
 
     if (frames.empty()) {
-        emit taskFinished(false, tr("Не удалось преобразовать изображения в cv::Mat"));
+        emit taskFinished(false, tr("Could not transform images to cv::Mat"));
         return;
     }
 
@@ -96,7 +95,7 @@ void CalibrationThread::run()
     }
 
     if (allCorners.empty()) {
-        emit taskFinished(false, tr("Недостаточно данных для калибровки"));
+        emit taskFinished(false, tr("Not enough data to begin calibration"));
         return;
     }
 
@@ -116,17 +115,15 @@ void CalibrationThread::run()
         if (rms > 0) {
             if (yamlHandler->saveCalibrationParameters("calibration.yml", cameraMatrix, distCoeffs)) {
                 emit taskFinished(
-                    true,
-                    QString(tr("Калибровка завершена успешно c показателем RMS = %1")).arg(rms));
+                    true, QString(tr("Calibration completed successfully with RMS = %1")).arg(rms));
             } else {
                 emit taskFinished(
-                    false, tr("Калибровка завершена, но не удалось сохранить файл калибровки"));
+                    false, tr("Error occured while saving calibration parameters to file"));
             }
         } else {
-            emit taskFinished(
-                false, QString(tr("Неудачная калибровка c показателем RMS = %1")).arg(rms));
+            emit taskFinished(false, QString(tr("Calibration failed with RMS = %1")).arg(rms));
         }
     } catch (const cv::Exception &e) {
-        emit taskFinished(false, QString(tr("Ошибка калибровки: %1")).arg(e.what()));
+        emit taskFinished(false, QString(tr("Calibration error: %1")).arg(e.what()));
     }
 }

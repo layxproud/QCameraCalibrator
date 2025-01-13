@@ -5,12 +5,13 @@
 Workspace::Workspace(QObject *parent)
     : QObject{parent}
     , yamlHandler(new YamlHandler(this))
-    , cameraThread(new CameraThread(this))
-    , calibrationThread(new CalibrationThread(this))
-    , markerThread(new MarkerThread(this))
+    , cameraThread(new CameraThread())
+    , calibrationThread(new CalibrationThread())
+    , markerThread(new MarkerThread())
     , frameNumber(0)
     , imagesDir(QDir::currentPath() + "/images")
     , calibrationStatus(false)
+    , calibrationParams{}
 {
     connect(cameraThread, &CameraThread::frameReady, this, &Workspace::frameReady);
     connect(markerThread, &MarkerThread::frameReady, this, &Workspace::frameReady);
@@ -44,6 +45,9 @@ void Workspace::init()
     // Initialize threads
     calibrationThread->setYamlHandler(yamlHandler);
     markerThread->setYamlHandler(yamlHandler);
+    if (calibrationStatus) {
+        markerThread->setCalibrationParams(calibrationParams);
+    }
 
     startThread(cameraThread);
 }
@@ -61,7 +65,7 @@ void Workspace::onCaptureFrame()
         emit frameCaptured(frameNumber);
     } else {
         frameNumber--;
-        emit taskFinished(false, tr("Не удалось сделать снимок"));
+        emit taskFinished(false, tr("Could not save frame"));
     }
 }
 
@@ -79,7 +83,7 @@ void Workspace::saveConfiguration(const Configuration &newConfiguration)
 {
     Configuration currentConfiguration = getCurrentConfiguration(newConfiguration);
     if (currentConfiguration.name == "") {
-        emit taskFinished(false, tr("Блок не обнаружен"));
+        emit taskFinished(false, tr("Block is not detected"));
         return;
     }
     yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
@@ -92,15 +96,15 @@ void Workspace::saveSingleConfiguration(
 {
     Configuration currentConfiguration = getCurrentConfiguration(newConfiguration);
     if (currentConfiguration.name == "") {
-        emit taskFinished(false, tr("Блок не обнаружен"));
+        emit taskFinished(false, tr("Block is not detected"));
         return;
     }
     std::map<std::string, Configuration> configurations;
     configurations.insert(std::make_pair(currentConfiguration.name, currentConfiguration));
     if (yamlHandler->saveConfigurations(fileName.toStdString(), configurations)) {
-        emit taskFinished(true, tr("Блок успешно сохранен в файл %1").arg(fileName));
+        emit taskFinished(true, tr("Block is saved to file %1").arg(fileName));
     } else {
-        emit taskFinished(false, tr("Произошла ошибка при сохранении блока!"));
+        emit taskFinished(false, tr("Error occured while saving block"));
     }
     return;
 }
@@ -129,13 +133,16 @@ void Workspace::exportConfiguration(const QString &fileName)
 
 void Workspace::selectCalibrationFile(const QString &fileName)
 {
-    if (yamlHandler->loadCalibrationParameters(fileName.toStdString(), calibrationParams)) {
+    calibrationStatus
+        = yamlHandler->loadCalibrationParameters(fileName.toStdString(), calibrationParams);
+    if (calibrationStatus) {
         emit calibrationUpdated(true);
         calibrationFileName = fileName.toStdString();
+        markerThread->setCalibrationParams(calibrationParams);
     } else {
         emit calibrationUpdated(false);
         emit taskFinished(
-            false, QString(tr("Could not load calibration params from file: %1").arg(fileName)));
+            false, QString(tr("Could not load calibration params from file %1").arg(fileName)));
     }
 }
 
@@ -189,23 +196,27 @@ void Workspace::ensureDirectoryIsClean(const QString &path)
 void Workspace::onPageChanged(int page)
 {
     if (page == 0) {
+        // Simply switch to camera thread
         stopThread(markerThread);
         startThread(cameraThread);
     } else {
-        CalibrationParams calibrationParams;
-        if (!yamlHandler->loadCalibrationParameters(calibrationFileName, calibrationParams)) {
+        // Before going to marker thread, check if calibration parameters are loaded
+        if (!calibrationStatus) {
             emit calibrationParamsMissing();
-            emit taskFinished(false, tr("Не обнаружен файл калибровки. Сначала откалибруйте камеру!"));
+            emit taskFinished(
+                false,
+                tr("Calibration file is missing! Calibrate camera first or load a valid file"));
             return;
         }
 
+        // Switch threads
         stopThread(cameraThread);
         stopThread(calibrationThread);
         startThread(markerThread);
-        markerThread->setCalibrationParams(calibrationParams);
     }
 }
 
+// Clears the directory with calibration images directory on app startup
 void Workspace::clearDirectory(const QString &path)
 {
     QDir dir(path);
@@ -218,8 +229,6 @@ void Workspace::clearDirectory(const QString &path)
 
 Configuration Workspace::getCurrentConfiguration(const Configuration &newConfiguration)
 {
-    // Получаю текущую конфигурацию из треда маркеров,
-    // потому что информация о маркерах и положении цента известна только там
     Configuration currentConfiguration = markerThread->getCurrConfiguration();
     currentConfiguration.id = newConfiguration.id;
     currentConfiguration.type = newConfiguration.type;

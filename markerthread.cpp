@@ -130,7 +130,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
     QMutexLocker locker(&mutex);
 
     if (markerIds.size() != 4) {
-        emit taskFinished(false, tr("Для конфигурации блока необходимо ровно 4 маркера"));
+        emit taskFinished(false, tr("You need exactly 4 markers to create a configuration"));
         return;
     }
 
@@ -141,7 +141,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
 
     Configuration newConfig = Configuration{};
     newConfig.markerIds = markerIds;
-    newConfig.name = currentConfiguration.name.empty() ? "Новая конфигурация"
+    newConfig.name = currentConfiguration.name.empty() ? "New configuration"
                                                        : currentConfiguration.name;
 
     for (int markerId : newConfig.markerIds) {
@@ -155,8 +155,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
     }
 
     configurations[newConfig.name] = newConfig;
-    // Костыль для того чтобы ГУИ успела обновиться
-    // Выглядит ужасно но что поделать
+    // This code was created to help GUI correctly update
     Configuration tempConfig = newConfig;
     detectCurrentConfiguration();
     if (tempConfig.name == currentConfiguration.name) {
@@ -167,7 +166,9 @@ void MarkerThread::onPointSelected(const QPointF &point)
 void MarkerThread::updateConfigurationsMap()
 {
     configurations.clear();
-    currentConfiguration.name = "...---..."; // Если была ошибка ввода то имя вернется к нормальному
+    // Some gibberish to reset name
+    // (will break if someone names configuration "...---...")
+    currentConfiguration.name = "...---...";
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 }
 
