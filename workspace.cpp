@@ -1,5 +1,6 @@
 #include "workspace.h"
 #include <QDebug>
+#include <QFileDialog>
 
 Workspace::Workspace(QObject *parent)
     : QObject{parent}
@@ -72,26 +73,55 @@ void Workspace::onMarkerSizeChanged(int size)
     markerThread->setMarkerSize(size);
 }
 
-void Workspace::saveConfiguration(const Configuration &newConfiguration, bool calledFromConfigWidget, bool saveSingleConfiguration)
+void Workspace::saveConfiguration(const Configuration &newConfiguration)
 {
-    // Получаю текущую конфигурацию из треда маркеров,
-    // потому что информация о маркерах и положении цента известна только там
-    if (!calledFromConfigWidget) {
-        Configuration currentConfiguration = markerThread->getCurrConfiguration();
-        currentConfiguration.id = newConfiguration.id;
-        currentConfiguration.type = newConfiguration.type;
-        currentConfiguration.name = newConfiguration.name;
-        currentConfiguration.date = newConfiguration.date;
-        yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
-    } else {
-        yamlHandler->updateConfigurations("configurations.yml", newConfiguration);
+    Configuration currentConfiguration = getCurrentConfiguration(newConfiguration);
+    if (currentConfiguration.name == "") {
+        emit taskFinished(false, tr("Блок не обнаружен"));
+        return;
     }
+    yamlHandler->updateConfigurations("configurations.yml", currentConfiguration);
+    emit configurationsUpdated();
+    return;
+}
+
+void Workspace::saveSingleConfiguration(
+    const Configuration &newConfiguration, const QString &fileName)
+{
+    Configuration currentConfiguration = getCurrentConfiguration(newConfiguration);
+    if (currentConfiguration.name == "") {
+        emit taskFinished(false, tr("Блок не обнаружен"));
+        return;
+    }
+    std::map<std::string, Configuration> configurations;
+    configurations.insert(std::make_pair(currentConfiguration.name, currentConfiguration));
+    if (yamlHandler->saveConfigurations(fileName.toStdString(), configurations)) {
+        emit taskFinished(true, tr("Блок успешно сохранен в файл %1").arg(fileName));
+    } else {
+        emit taskFinished(false, tr("Произошла ошибка при сохранении блока!"));
+    }
+    return;
+}
+
+void Workspace::editConfiguration(const Configuration &newConfiguration)
+{
+    yamlHandler->updateConfigurations("configurations.yml", newConfiguration);
     emit configurationsUpdated();
 }
 
 void Workspace::removeConfiguration(const Configuration &config)
 {
     yamlHandler->removeConfiguration("configurations.yml", config);
+    emit configurationsUpdated();
+}
+
+void Workspace::exportConfiguration(const QString &fileName)
+{
+    std::map<std::string, Configuration> configurations;
+    yamlHandler->loadConfigurations(fileName.toStdString(), configurations);
+    for (const auto &config : configurations) {
+        yamlHandler->updateConfigurations("configurations.yml", config.second);
+    }
     emit configurationsUpdated();
 }
 
@@ -170,4 +200,16 @@ void Workspace::clearDirectory(const QString &path)
     foreach (QString dirFile, dir.entryList()) {
         dir.remove(dirFile);
     }
+}
+
+Configuration Workspace::getCurrentConfiguration(const Configuration &newConfiguration)
+{
+    // Получаю текущую конфигурацию из треда маркеров,
+    // потому что информация о маркерах и положении цента известна только там
+    Configuration currentConfiguration = markerThread->getCurrConfiguration();
+    currentConfiguration.id = newConfiguration.id;
+    currentConfiguration.type = newConfiguration.type;
+    currentConfiguration.name = newConfiguration.name;
+    currentConfiguration.date = newConfiguration.date;
+    return currentConfiguration;
 }

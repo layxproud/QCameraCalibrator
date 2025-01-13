@@ -57,7 +57,7 @@ Configuration ConfigurationForm::getData()
 
 void ConfigurationForm::onEditButton()
 {
-    emit editConfiguration(getData(), true);
+    emit editConfiguration(getData());
 }
 
 void ConfigurationForm::onDeleteButton()

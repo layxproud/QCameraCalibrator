@@ -19,11 +19,11 @@
 #      - OpenCV_LIBS                     : The list of libraries to link against.
 #      - OpenCV_INCLUDE_DIRS             : The OpenCV include directories.
 #      - OpenCV_COMPUTE_CAPABILITIES     : The version of compute capability
-#      - OpenCV_VERSION                  : The version of this OpenCV build: "4.10.0"
+#      - OpenCV_VERSION                  : The version of this OpenCV build: "4.9.0"
 #      - OpenCV_VERSION_MAJOR            : Major version part of OpenCV_VERSION: "4"
-#      - OpenCV_VERSION_MINOR            : Minor version part of OpenCV_VERSION: "10"
+#      - OpenCV_VERSION_MINOR            : Minor version part of OpenCV_VERSION: "9"
 #      - OpenCV_VERSION_PATCH            : Patch version part of OpenCV_VERSION: "0"
-#      - OpenCV_VERSION_STATUS           : Development status of this build: "-dev"
+#      - OpenCV_VERSION_STATUS           : Development status of this build: ""
 #
 #    Advanced variables:
 #      - OpenCV_SHARED
@@ -137,7 +137,7 @@ elseif(MSVC)
         set(OpenCV_RUNTIME vc14) # selecting previous compatible runtime version
       endif()
     endif()
-  elseif(MSVC_VERSION MATCHES "^19[34][0-9]$")
+  elseif(MSVC_VERSION MATCHES "^193[0-9]$")
     set(OpenCV_RUNTIME vc17)
     check_one_config(has_VS2022)
     if(NOT has_VS2022)

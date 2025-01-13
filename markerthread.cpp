@@ -31,7 +31,11 @@ void MarkerThread::run()
     cv::Size newSize(640, 480);
 
     cap.open(0);
-    // cap.open("rtsp://admin:QulonCamera1@192.168.1.85:554/video");
+    // cap.open(
+    //     "udpsrc port=5000 caps = \"application/x-rtp, media=(string)video, clock-rate=(int)90000, "
+    //     "encoding-name=(string)H264, payload=(int)96\" ! rtph264depay ! decodebin ! videoconvert ! "
+    //     "appsink",
+    //     cv::CAP_GSTREAMER);
 
     if (!cap.isOpened())
         return;

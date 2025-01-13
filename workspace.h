@@ -34,11 +34,11 @@ public slots:
     void onCaptureFrame();
     void onStartCalibration();
     void onMarkerSizeChanged(int size);
-    void saveConfiguration(
-        const Configuration &newConfiguration,
-        bool calledFromConfigWidget,
-        bool saveSingleConfiguration);
+    void saveConfiguration(const Configuration &newConfiguration);
+    void saveSingleConfiguration(const Configuration &newConfiguration, const QString &fileName);
+    void editConfiguration(const Configuration &newConfiguration);
     void removeConfiguration(const Configuration &config);
+    void exportConfiguration(const QString &fileName);
 
 private:
     YamlHandler *yamlHandler;
@@ -56,6 +56,7 @@ private:
     void stopThread(QThread *thread);
     void ensureDirectoryIsClean(const QString &path);
     void clearDirectory(const QString &path);
+    Configuration getCurrentConfiguration(const Configuration &newConfiguration);
 };
 
 #endif // WORKSPACE_H

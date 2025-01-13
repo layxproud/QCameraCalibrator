@@ -18,7 +18,7 @@ public:
     Configuration getData();
 
 signals:
-    void editConfiguration(const Configuration &config, bool calledFromConfigWidget);
+    void editConfiguration(const Configuration &config);
     void removeConfiguration(const Configuration &config);
 
 private:
@@ -52,7 +52,7 @@ public:
     void setConfigurations(const std::map<std::string, Configuration> &configurations);
 
 signals:
-    void editConfiguration(const Configuration &config, bool calledFromConfigWidget);
+    void editConfiguration(const Configuration &config);
     void removeConfiguration(const Configuration &config);
 
 private:

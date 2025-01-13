@@ -690,6 +690,7 @@ namespace wip { namespace ov {
  * taking into account the i/o data transfer.
  */
 struct benchmark_mode { };
+/** @} */
 
 } // namespace ov
 } // namespace wip

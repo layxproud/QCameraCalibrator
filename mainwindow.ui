@@ -32,7 +32,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="calibrationPage">
        <property name="geometry">
@@ -288,6 +288,13 @@
         <string>Список блоков маркеров</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="exportConfigButton">
+          <property name="text">
+           <string>Экспортировать блок</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QVBoxLayout" name="editorLayout"/>
         </item>

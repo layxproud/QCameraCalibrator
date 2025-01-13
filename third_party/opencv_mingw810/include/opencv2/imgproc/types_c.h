@@ -376,9 +376,8 @@ enum
 /** ... and other image warping flags */
 enum
 {
-    CV_WARP_FILL_OUTLIERS = 8,
-    CV_WARP_INVERSE_MAP   = 16,
-    CV_WARP_RELATIVE_MAP  = 32
+    CV_WARP_FILL_OUTLIERS =8,
+    CV_WARP_INVERSE_MAP  =16
 };
 
 /** Shapes of a structuring element for morphological operations

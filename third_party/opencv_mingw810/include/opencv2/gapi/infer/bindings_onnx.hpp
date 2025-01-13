@@ -51,9 +51,6 @@ public:
     GAPI_WRAP
     PyParams& cfgDisableMemPattern();
 
-    GAPI_WRAP
-    PyParams& cfgSessionOptions(const std::map<std::string, std::string>& options);
-
     GBackend backend() const;
     std::string tag() const;
     cv::util::any params() const;

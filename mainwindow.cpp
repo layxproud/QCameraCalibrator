@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDateTime>
 #include <QDebug>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QUuid>
@@ -28,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
         captuteFrameShortcut, &QShortcut::activated, workspace, &Workspace::onCaptureFrame);
     connect(ui->calibrateButton, &QPushButton::clicked, workspace, &Workspace::onStartCalibration);
     connect(ui->toolBox, &QToolBox::currentChanged, workspace, &Workspace::onPageChanged);
+    connect(ui->exportConfigButton, &QPushButton::clicked, this, &MainWindow::onExportConfiguration);
     connect(
         ui->markerSizeInput,
         QOverload<int>::of(&QSpinBox::valueChanged),
@@ -46,10 +48,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::pointSelected, workspace, &Workspace::pointSelected);
     connect(this, &MainWindow::saveConfiguration, workspace, &Workspace::saveConfiguration);
     connect(
+        this, &MainWindow::saveSingleConfiguration, workspace, &Workspace::saveSingleConfiguration);
+    connect(this, &MainWindow::exportConfiguration, workspace, &Workspace::exportConfiguration);
+    connect(
         configurationsWidget,
         &ConfigurationsWidget::editConfiguration,
         workspace,
-        &Workspace::saveConfiguration);
+        &Workspace::editConfiguration);
     connect(
         configurationsWidget,
         &ConfigurationsWidget::removeConfiguration,
@@ -82,6 +87,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+// Detects clicks on the camera widget and sends mouse coordinates
+// to workspace and markerThread
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
@@ -136,13 +143,15 @@ void MainWindow::onCalibrationParametersMissing()
 void MainWindow::onSaveConfiguration()
 {
     Configuration newConfiguration = formConfiguration();
-    emit saveConfiguration(newConfiguration, false, false);
+    emit saveConfiguration(newConfiguration);
 }
 
 void MainWindow::onSaveSingleConfiguration()
 {
     Configuration newConfiguration = formConfiguration();
-    emit saveConfiguration(newConfiguration, false, true);
+    QString fileName = QFileDialog::getSaveFileName(
+        this, tr("Сохранение блока"), QString(), tr("YAML files (*.yml)"));
+    emit saveSingleConfiguration(newConfiguration, fileName);
 }
 
 void MainWindow::onCofigurationsUpdated()
@@ -162,4 +171,11 @@ void MainWindow::onCalibrationUpdated(bool status)
 void MainWindow::onFrameCaptured(int num)
 {
     ui->framesCapturedValue->setText(QString::number(num));
+}
+
+void MainWindow::onExportConfiguration()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Экспорт блока"), QString(), tr("YAML files (*.yml)"));
+    emit exportConfiguration(fileName);
 }

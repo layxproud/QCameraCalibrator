@@ -24,8 +24,9 @@ public:
 
 signals:
     void pointSelected(const QPointF &point);
-    void saveConfiguration(
-        const Configuration &config, bool calledFromConfigWidget, bool saveSingleConfiguration);
+    void saveConfiguration(const Configuration &config);
+    void saveSingleConfiguration(const Configuration &config, const QString &fileName);
+    void exportConfiguration(const QString &fileName);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -47,6 +48,7 @@ private slots:
     void onCofigurationsUpdated();
     void onCalibrationUpdated(bool status);
     void onFrameCaptured(int num);
+    void onExportConfiguration();
 };
 
 #endif // MAINWINDOW_H
