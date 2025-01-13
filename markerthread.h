@@ -38,7 +38,7 @@ private:
     QMutex mutex;
     YamlHandler *yamlHandler;
 
-    float markerSize = 31.0f;
+    float markerSize;
     cv::aruco::Dictionary AruCoDict;
     cv::aruco::DetectorParameters detectorParams;
     cv::aruco::ArucoDetector detector;

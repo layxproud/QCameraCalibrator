@@ -5,6 +5,7 @@
 MarkerThread::MarkerThread(QObject *parent)
     : QThread{parent}
     , running(false)
+    , markerSize(55.0f)
 {
     updateConfigurationsMap();
 
@@ -83,7 +84,7 @@ void MarkerThread::run()
 
                 updateSelectedPointPosition();
 
-                // Перевод точки из пространства на плоскость
+                // 3D point to 2D
                 if (selectedPoint != cv::Point3f(0.0, 0.0, 0.0)
                     && !currentConfiguration.name.empty()) {
                     qDebug() << "X: " << selectedPoint.x;
@@ -166,9 +167,7 @@ void MarkerThread::onPointSelected(const QPointF &point)
 void MarkerThread::updateConfigurationsMap()
 {
     configurations.clear();
-    // Some gibberish to reset name
-    // (will break if someone names configuration "...---...")
-    currentConfiguration.name = "...---...";
+    currentConfiguration.clear();
     yamlHandler->loadConfigurations("configurations.yml", configurations);
 }
 
