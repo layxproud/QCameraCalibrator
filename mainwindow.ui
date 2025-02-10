@@ -245,16 +245,16 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="saveToConfigurationsButton">
+           <widget class="QPushButton" name="saveSingleConfigButton">
             <property name="text">
-             <string>Сохранить в общий файл</string>
+             <string>Сохранить отдельно</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveSingleConfigButton">
+           <widget class="QPushButton" name="saveToConfigurationsButton">
             <property name="text">
-             <string>Сохранить отдельно</string>
+             <string>Сохранить в общий файл</string>
             </property>
            </widget>
           </item>
@@ -280,8 +280,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>181</width>
-         <height>55</height>
+         <width>759</width>
+         <height>381</height>
         </rect>
        </property>
        <attribute name="label">
